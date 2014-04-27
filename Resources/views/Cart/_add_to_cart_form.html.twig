@@ -1,0 +1,21 @@
+<div class="form-body add-to-cart">
+	{{ bootstrap_set_style('horizontal') }}
+	{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
+	{% for option in options %}
+	{% if form['option-' ~ option.id] %}
+	{{ form_row(form['option-' ~ option.id], {'label_col': 3, 'widget_col': 9, 'col_size': 'md'}) }}
+	{% endif %}
+	{% endfor %}
+	<div class="row">
+	    <div class="col-md-12 col-lg-4 add-to-cart-quantity">
+	        {{ form_row(form.quantity, {'label_col': 6, 'widget_col': 6, 'col_size': 'md'}) }}
+	    </div>
+	    <div class="col-md-6 col-lg-4 add-to-cart-price">
+	        <span>{{ product.price|price }}</span>
+	    </div>
+	    <div class="col-md-6 col-lg-4 add-to-cart-submit">
+	        {{ form_widget(form.submit) }}
+	    </div>
+	</div>
+	{{ form_rest(form) }}
+</div>

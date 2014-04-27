@@ -1,0 +1,65 @@
+ekyna_cart_index:
+    pattern: /cart/index
+    defaults:
+        _controller: EkynaCartBundle:Cart:index
+        _cms:
+            name: Mon panier
+            footer: true
+            position: 98
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_informations:
+    pattern: /cart/informations
+    defaults:
+        _controller: EkynaCartBundle:Cart:informations
+        _cms:
+            parent: ekyna_cart_index
+            name: Mes informations
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_shipping:
+    pattern: /cart/shipping-mode
+    defaults:
+        _controller: EkynaCartBundle:Cart:shipping
+        _cms:
+            parent: ekyna_cart_index
+            name: Mode de livraisons
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_payment:
+    pattern: /cart/payment-method
+    defaults:
+        _controller: EkynaCartBundle:Cart:payment
+        _cms:
+            parent: ekyna_cart_index
+            name: Moyen de paiement
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_confirmation:
+    pattern: /cart/confirmation
+    defaults:
+        _controller: EkynaCartBundle:Cart:confirmation
+        _cms:
+            parent: ekyna_cart_index
+            name: Confirmation
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_add_item:
+    pattern: /cart/add-item
+    defaults:
+        _controller: EkynaCartBundle:Cart:addItem
+    requirements:
+        _method: GET|POST
+
+ekyna_cart_remove_item:
+    pattern: /cart/remove-item/{itemId}
+    defaults:
+        _controller: EkynaCartBundle:Cart:removeItem
+    requirements:
+        _method: GET|POST
+        itemId: \d+

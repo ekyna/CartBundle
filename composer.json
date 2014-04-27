@@ -1,0 +1,35 @@
+{
+    "name" : "ekyna/cart-bundle",
+    "description" : "Cart management",
+    "type" : "symfony-bundle",
+    "authors" : [{
+            "name" : "Etienne Dauvergne",
+            "homepage" : "http://ekyna.com"
+        }
+    ],
+    "keywords" : [
+        "symfony2",
+        "order",
+        "bundle"
+    ],
+    "homepage" : "https://github.com/ekyna/CartBundle",
+    "license" : [
+        "MIT"
+    ],
+    "require" : {
+        "php" : ">=5.4",
+        "symfony/framework-bundle" : "~2.3",
+        "ekyna/order-bundle" : "0.1.*@dev"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "Ekyna\\Bundle\\CartBundle" : ""
+        }
+    },
+    "target-dir" : "Ekyna/Bundle/CartBundle",
+    "extra" : {
+        "branch-alias" : {
+            "dev-master" : "0.1.x-dev"
+        }
+    }
+}
