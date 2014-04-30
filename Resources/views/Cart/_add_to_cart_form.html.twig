@@ -1,9 +1,9 @@
 <div class="form-body add-to-cart">
 	{{ bootstrap_set_style('horizontal') }}
 	{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
-	{% for option in options %}
-	{% if form['option-' ~ option.id] %}
-	{{ form_row(form['option-' ~ option.id], {'label_col': 3, 'widget_col': 9, 'col_size': 'md'}) }}
+	{% for group in options %}
+	{% if form['option-' ~ group] %}
+	{{ form_row(form['option-' ~ group], {'label_col': 3, 'widget_col': 9, 'col_size': 'md'}) }}
 	{% endif %}
 	{% endfor %}
 	<div class="row">

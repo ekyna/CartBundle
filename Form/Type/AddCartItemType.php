@@ -17,6 +17,13 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  */
 class AddCartItemType extends AbstractType
 {
+    protected $optionsConfiguration;
+
+    public function __construct(array $optionsConfiguration)
+    {
+        $this->optionsConfiguration = $optionsConfiguration;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -43,14 +50,18 @@ class AddCartItemType extends AbstractType
             if ($product->hasOptions()) {
                 $groups = $product->getOptionsGroups();
                 foreach ($groups as $group) {
-                    $form->add('option-'.$group->getId(), 'entity', array(
-                        'label' => $group->getName(),
+                    if(! array_key_exists($group, $this->optionsConfiguration)) {
+                        throw new \RuntimeException(sprintf('Undefined option configuration "%s".', $group));
+                    }
+                    $config = $this->optionsConfiguration[$group];
+                    $form->add('option-'.$group, 'entity', array(
+                        'label' => $this->optionsConfiguration[$group]['label'],
                         'required' => false,
                         'empty_value' => 'Choisissez une option',
                         'attr' => array(
                     	    'placeholder' => 'Choisissez une option',
                         ),
-                        'class' => 'EkynaProductBundle:Option',
+                        'class' => $this->optionsConfiguration[$group]['class'],
                         'query_builder' => function(EntityRepository $er) use ($product, $group) {
                             $qb = $er->createQueryBuilder('o');
                             return $qb

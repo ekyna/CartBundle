@@ -52,6 +52,7 @@
             <tag name="form.type" alias="ekyna_cart_item" />
         </service>
         <service id="ekyna_cart.add_cart_item.form_type" class="%ekyna_cart.add_cart_item.form_type.class%">
+            <argument>%ekyna_product.options.configuration%</argument>
             <tag name="form.type" alias="ekyna_add_cart_item" />
         </service>
         <service id="ekyna_cart.cart_addresses.form_type" class="%ekyna_cart.cart_addresses.form_type.class%">

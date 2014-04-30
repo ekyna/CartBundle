@@ -71,8 +71,8 @@ class CartItemFactory implements CartItemFactoryInterface
 	       ->setQuantity($form->get('quantity')->getData())
 	    ;
 
-	    foreach ($product->getOptionsGroups() as $optionGroup) {
-	        if (null !== $option = $form->get('option-'.$optionGroup->getId())->getData()) {
+	    foreach ($product->getOptionsGroups() as $group) {
+	        if (null !== $option = $form->get('option-'.$group)->getData()) {
 	            if ($product->hasOption($option)) {
     	            $itemOption = $this->createItemOptionFromOption($option);
     	            $item->addOption($itemOption);
