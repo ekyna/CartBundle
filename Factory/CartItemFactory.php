@@ -84,14 +84,9 @@ class CartItemFactory implements CartItemFactoryInterface
     }
 
     /**
-     * Returns an OrderItem created from the given Product.
-     *
-     * @param \Ekyna\Component\Sale\Product\ProductInterface $product 
-     * @param \Ekyna\Component\Sale\Product\OptionInterface[] $options An array of options
-     *
-     * @return \Ekyna\Component\Sale\Order\OrderItemInterface
+     * {@inheritdoc}
      */
-    protected function createItemFromProduct(ProductInterface $product, array $options = array())
+    public function createItemFromProduct(ProductInterface $product, array $options = array())
     {
         $item = new OrderItem();
 

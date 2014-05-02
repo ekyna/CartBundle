@@ -7,7 +7,6 @@ use Ekyna\Bundle\CartBundle\Events\CartEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * CartController.
@@ -167,10 +166,10 @@ class CartController extends Controller
         ));
 
         if(null !== $referer = $request->headers->get('referer', null)) {
-            return new RedirectResponse($referer);
+            return $this->redirect($referer);
         }
 
-        return new RedirectResponse($this->generateUrl('ekyna_cart_index'));
+        return $this->redirect($this->generateUrl('ekyna_cart_index'));
     }
 
     public function removeItemAction(Request $request)
