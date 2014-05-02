@@ -59,11 +59,26 @@ class CartProvider implements CartProviderInterface
         $this->session->set($this->key, $cart->getId());
     }
 
-    public function unsetCart()
+    /**
+     * {@inheritdoc}
+     */
+    public function clearCart()
     {
+        $this->cart = null;
         $this->session->set($this->key, null);
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
+    public function newCart()
+    {
+        $this->clearCart();
+        $this->setCart($this->repository->createNew());
+
+        return $this->cart;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -74,7 +89,7 @@ class CartProvider implements CartProviderInterface
                 $this->setCart($this->repository->findCart($cartId));
             }
             if(null === $this->cart) {
-                $this->setCart($this->repository->createNew());
+                $this->newCart();
             }
         }
 
