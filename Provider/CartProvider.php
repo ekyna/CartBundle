@@ -63,7 +63,7 @@ class CartProvider implements CartProviderInterface
     {
         $this->session->set($this->key, null);
     }
-
+    
     /**
      * {@inheritdoc}
      */

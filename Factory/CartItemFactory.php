@@ -86,11 +86,12 @@ class CartItemFactory implements CartItemFactoryInterface
     /**
      * Returns an OrderItem created from the given Product.
      *
-     * @param \Ekyna\Component\Sale\Product\ProductInterface $product
+     * @param \Ekyna\Component\Sale\Product\ProductInterface $product 
+     * @param \Ekyna\Component\Sale\Product\OptionInterface[] $options An array of options
      *
      * @return \Ekyna\Component\Sale\Order\OrderItemInterface
      */
-    protected function createItemFromProduct(ProductInterface $product)
+    protected function createItemFromProduct(ProductInterface $product, array $options = array())
     {
         $item = new OrderItem();
 
@@ -103,6 +104,11 @@ class CartItemFactory implements CartItemFactoryInterface
             ->setWeight($product->getWeight())
             ->setQuantity(1)
         ;
+
+        foreach ($options as $option) {
+            $itemOption = $this->createItemOptionFromOption($option);
+            $item->addOption($itemOption);
+        }
 
         return $item;
     }
