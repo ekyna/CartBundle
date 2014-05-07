@@ -2,8 +2,8 @@
 
 namespace Ekyna\Bundle\CartBundle\Provider;
 
-use Ekyna\Bundle\OrderBundle\Entity\OrderRepository;
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
+use Ekyna\Bundle\OrderBundle\Entity\OrderRepository;
 use Ekyna\Component\Sale\Order\OrderInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -56,6 +56,7 @@ class CartProvider implements CartProviderInterface
     public function setCart(OrderInterface $cart)
     {
         $this->cart = $cart;
+        $this->cart->setType(OrderInterface::TYPE_CART);
         $this->session->set($this->key, $cart->getId());
     }
 
@@ -74,7 +75,7 @@ class CartProvider implements CartProviderInterface
     public function newCart()
     {
         $this->clearCart();
-        $this->setCart($this->repository->createNew());
+        $this->setCart($this->repository->createNew(OrderInterface::TYPE_CART));
 
         return $this->cart;
     }
@@ -86,7 +87,9 @@ class CartProvider implements CartProviderInterface
     {
         if(null === $this->cart) {
             if(null !== $cartId = $this->session->get($this->key, null)) {
-                $this->setCart($this->repository->findCart($cartId));
+                if (null !== $cart = $this->repository->findOneBy(array('id' => $cartId, 'type' => OrderInterface::TYPE_CART))) {
+                    $this->setCart($cart);
+                }
             }
             if(null === $this->cart) {
                 $this->newCart();

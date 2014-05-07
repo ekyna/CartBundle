@@ -2,24 +2,19 @@
 
 namespace Ekyna\Bundle\CartBundle\Listener;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
-use Ekyna\Bundle\CartBundle\Events\CartEvents;
-use Ekyna\Bundle\CartBundle\Events\CartEvent;
-use Ekyna\Bundle\OrderBundle\Model\UpdaterInterface;
+use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
+use Ekyna\Bundle\OrderBundle\Event\OrderEvents;
+use Ekyna\Component\Sale\Order\OrderInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * CartSubscriber
+ * CartSubscriber.
  *
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var \Ekyna\Bundle\OrderBundle\Model\UpdaterInterface
-     */
-    private $updater;
-
     /**
      * @var \Ekyna\Bundle\CartBundle\Model\CartProviderInterface
      */
@@ -28,35 +23,38 @@ class CartSubscriber implements EventSubscriberInterface
     /**
      * Constructor.
      *
-     * @param \Ekyna\Bundle\OrderBundle\Model\UpdaterInterface     $updater
      * @param \Ekyna\Bundle\CartBundle\Model\CartProviderInterface $provider
      */
-    public function __construct(UpdaterInterface $updater, CartProviderInterface $provider)
+    public function __construct(CartProviderInterface $provider)
     {
-        $this->updater = $updater;
         $this->provider = $provider;
     }
 
     /**
-     * Cart updated event handler
+     * Order post content change event handler.
      * 
-     * @param \Ekyna\Bundle\CartBundle\Events\CartEvent $event
+     * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
      */
-    public function onCartUpdated(CartEvent $event)
+    public function onOrderPostContentChange(OrderEvent $event)
     {
-        $cart = $event->getCart();
-        $this->updater->update($cart);
+        $order = $event->getOrder();
+        if ($order->getType() == OrderInterface::TYPE_CART) {
+            $this->provider->setCart($order);
+        }
     }
 
     /**
-     * Cart saved event handler.
-     * 
-     * @param \Ekyna\Bundle\CartBundle\Events\CartEvent $event
+     * Order post state change event handler.
+     *
+     * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
      */
-    public function onCartSaved(CartEvent $event)
+    public function onOrderPostStateChange(OrderEvent $event)
     {
-        $cart = $event->getCart();
-        $this->provider->setCart($cart);
+        $order = $event->getOrder();
+        $cart  = $this->provider->getCart();
+        if ($order->getId() == $cart->getId() && $order->getType() != OrderInterface::TYPE_CART) {
+            $this->provider->clearCart();
+        }
     }
 
     /**
@@ -65,8 +63,8 @@ class CartSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
     	return array(
-    		CartEvents::UPDATED => array('onCartUpdated', 0),
-    		CartEvents::SAVED   => array('onCartSaved', 0),
+    		OrderEvents::POST_CONTENT_CHANGE => array('onOrderPostContentChange', 0),
+    		OrderEvents::POST_STATE_CHANGE   => array('onOrderPostStateChange',   0),
     	);
     }
 }

@@ -7,4 +7,10 @@
         {{ cms_content() }}
     </div>
 </div>
+<div class="row">
+    <div class="col-md-12">
+        <a href="{{ path('ekyna_payment_paypal') }}">Test paypal 1</a><br>
+        <a href="{{ path('ekyna_cart_payment') }}?method=paypal_express_checkout">Test paypal 2</a>
+    </div>
+</div>
 {% endblock body %}

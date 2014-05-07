@@ -39,6 +39,13 @@ ekyna_cart_payment:
     requirements:
         _method: GET|POST
 
+ekyna_cart_payment_check:
+    pattern: /cart/payment-check
+    defaults:
+        _controller: EkynaCartBundle:Cart:paymentCheck
+    requirements:
+        _method: GET|POST
+
 ekyna_cart_confirmation:
     pattern: /cart/confirmation
     defaults:

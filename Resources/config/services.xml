@@ -30,7 +30,6 @@
 
         <!-- Events subscriber -->
         <service id="ekyna_cart.cart_subscriber" class="%ekyna_cart.cart_subscriber.class%">
-            <argument type="service" id="ekyna_order.order_updater" />
             <argument type="service" id="ekyna_cart.cart_provider" />
             <tag name="kernel.event_subscriber" />
         </service>

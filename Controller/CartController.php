@@ -2,8 +2,13 @@
 
 namespace Ekyna\Bundle\CartBundle\Controller;
 
-use Ekyna\Bundle\CartBundle\Events\CartEvents;
-use Ekyna\Bundle\CartBundle\Events\CartEvent;
+use Ekyna\Bundle\CoreBundle\Exception\RedirectException;
+use Ekyna\Bundle\OrderBundle\Entity\OrderPayment;
+use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
+use Ekyna\Bundle\OrderBundle\Event\OrderEvents;
+use Ekyna\Bundle\PaymentBundle\Payum\Request\PaymentStatusRequest;
+use Ekyna\Component\Sale\Payment\PaymentStates;
+use Ekyna\Component\Sale\Order\OrderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,20 +23,16 @@ class CartController extends Controller
     public function indexAction(Request $request)
     {
         $cart = $this->get('ekyna_cart.cart_provider')->getCart();
-        $eventDispatcher = $this->get('event_dispatcher');
 
         $form = $this->createForm('ekyna_cart', $cart);
 
         $form->handleRequest($request);
         if ($form->isValid()) {
-
-            $eventDispatcher->dispatch(CartEvents::UPDATED, new CartEvent($cart));
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($cart);
-            $em->flush();
-
-            $eventDispatcher->dispatch(CartEvents::SAVED, new CartEvent($cart));
+            $this
+                ->ensureCartIsNotLocked($cart)
+                ->ensureCartIsNotEmpty($cart)
+            ;
+            $this->get('event_dispatcher')->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
 
             if ($request->isXmlHttpRequest()) {
                 // TODO
@@ -57,11 +58,12 @@ class CartController extends Controller
     public function informationsAction(Request $request)
     {
         $cart = $this->get('ekyna_cart.cart_provider')->getCart();
-        $user = $this->getUser();
+        $this
+            ->ensureCartIsNotLocked($cart)
+            ->ensureCartIsNotEmpty($cart)
+        ;
 
-        if ($cart->isEmpty()) {
-            return $this->redirect($this->generateUrl('ekyna_cart_index'));
-        }
+        $user = $this->getUser();
 
         if (! $this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $request->getSession()->set('_ekyna.login_success.target_path', 'ekyna_cart_informations');
@@ -69,21 +71,17 @@ class CartController extends Controller
         }
 
         $cart->setUser($user);
-        
+
         $form = $this->createForm('ekyna_cart_addresses', $cart, array(
         	'user' => $user
         ));
 
+        $eventDispatcher = $this->get('event_dispatcher');
+        $eventDispatcher->dispatch(OrderEvents::PRE_CONTENT_CHANGE, new OrderEvent($cart));
+
         $form->handleRequest($request);
         if ($form->isValid()) {
-
-            //$eventDispatcher->dispatch(CartEvents::UPDATED, new CartEvent($cart));
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($cart);
-            $em->flush();
-
-            //$eventDispatcher->dispatch(CartEvents::SAVED, new CartEvent($cart));
+            $eventDispatcher->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
 
             if ($cart->requiresShipment()) {
                 return $this->redirect($this->generateUrl('ekyna_cart_shipping'));
@@ -109,11 +107,28 @@ class CartController extends Controller
         }
 
         $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $this
+            ->ensureCartIsNotLocked($cart)
+            ->ensureCartIsNotEmpty($cart)
+        ;
 
         // Go to payment page if no shipment required
         if (! $cart->requiresShipment()) {
             return $this->redirect($this->generateUrl('ekyna_cart_payment'));
         }
+
+        /*
+        $form = $this->createForm('ekyna_cart_shipment', $cart);
+
+        $eventDispatcher = $this->get('event_dispatcher');
+        $eventDispatcher->dispatch(OrderEvents::PRE_CONTENT_CHANGE, new OrderEvent($cart));
+
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            $eventDispatcher->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
+
+            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
+        }*/
 
         return $this->render('EkynaCartBundle:Cart:shipping.html.twig');
     }
@@ -124,7 +139,70 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
 
+        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $this
+            ->ensureCartIsNotLocked($cart)
+            ->ensureCartIsNotEmpty($cart)
+        ;
+
+        if(null !== $method = $request->query->get('method', null)) {
+
+            $eventDispatcher = $this->get('event_dispatcher');
+            $eventDispatcher->dispatch(OrderEvents::PRE_PAYMENT_PROCESS, new OrderEvent($cart));
+            $eventDispatcher->dispatch(OrderEvents::PRE_CONTENT_CHANGE, new OrderEvent($cart));
+
+            $payment = new OrderPayment();
+            $payment
+                ->setAmount($cart->getAtiTotal())
+                ->setCurrency('EUR')
+                ->setMethod($method)
+            ;
+
+            $cart->addPayment($payment);
+
+            $eventDispatcher->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
+
+            $captureToken = $this->get('payum.security.token_factory')->createCaptureToken(
+                $method,
+                $payment,
+                'ekyna_cart_payment_check' // the route to redirect after capture;
+            );
+
+            return $this->redirect($captureToken->getTargetUrl());
+        }
+
         return $this->render('EkynaCartBundle:Cart:payment.html.twig');
+    }
+
+    public function paymentCheckAction(Request $request)
+    {
+        if (! $this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        }
+
+        $httpRequestVerifier = $this->get('payum.security.http_request_verifier');
+        $token = $httpRequestVerifier->verify($request);
+
+        $status = new PaymentStatusRequest($token);
+        $this->get('payum')->getPayment($token->getPaymentName())->execute($status);
+
+        $payment = $status->getModel();
+        $cart = $payment->getOrder();
+
+        $httpRequestVerifier->invalidate($token);
+
+        if (in_array($payment->getState(), array(PaymentStates::STATE_SUCCESS, PaymentStates::STATE_COMPLETED))) {
+            $this->get('session')->getFlashBag()->set('success', 'ekyna_payment.success.message');
+        } else if ($payment->getState() == PaymentStates::STATE_PENDING) {
+            $this->get('session')->getFlashBag()->set('warning', 'ekyna_payment.pending.message');
+        } else {
+            $this->get('session')->getFlashBag()->set('danger', 'ekyna_payment.failed.message');
+            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
+        }
+
+        $this->get('event_dispatcher')->dispatch(OrderEvents::POST_PAYMENT_PROCESS, new OrderEvent($cart));
+        
+        return $this->redirect($this->generateUrl('ekyna_cart_confirmation'));
     }
 
     public function confirmationAction(Request $request)
@@ -133,37 +211,41 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
 
-        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig');
+        return $this->render(
+            'EkynaCartBundle:Cart:confirmation.html.twig'
+        );
     }
 
     public function addItemAction(Request $request)
     {
+        $messageType = 'info';
+        $message = '';
+
+        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+
+        $this->ensureCartIsNotLocked($cart);
+
         $item = $this->get('ekyna_cart.cart_item.factory')->createItemFromRequest($request);
 
-        $cartProvider = $this->get('ekyna_cart.cart_provider');
         $eventDispatcher = $this->get('event_dispatcher');
+        $eventDispatcher->dispatch(OrderEvents::PRE_CONTENT_CHANGE, new OrderEvent($cart));
 
-        $cart = $cartProvider->getCart();
         $cart->addItem($item);
 
-        $eventDispatcher->dispatch(CartEvents::UPDATED, new CartEvent($cart));
+        $eventDispatcher->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
 
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($cart);
-        $em->flush();
-
-        $eventDispatcher->dispatch(CartEvents::SAVED, new CartEvent($cart));
+        $message = sprintf(
+            'L\'article "%s" a bien été ajouté à <a href="%s">votre panier</a>.', 
+            $item->getProduct()->getDesignation(),
+            $this->generateUrl('ekyna_cart_index')
+        );
 
         if ($request->isXmlHttpRequest()) {
             // TODO
             return new Response();
         }
 
-        $this->get('session')->getFlashBag()->add('info', sprintf(
-            'L\'article "%s" a bien été ajouté à <a href="%s">votre panier</a>.', 
-            $item->getProduct()->getDesignation(),
-            $this->generateUrl('ekyna_cart_index')
-        ));
+        $this->get('session')->getFlashBag()->add($messageType, $message);
 
         if(null !== $referer = $request->headers->get('referer', null)) {
             return $this->redirect($referer);
@@ -174,17 +256,70 @@ class CartController extends Controller
 
     public function removeItemAction(Request $request)
     {
-        $cartProvider = $this->get('ekyna_cart.cart_provider');
-        $eventDispatcher = $this->get('event_dispatcher');
+        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
 
-        $cart = $cartProvider->getCart();
+        $this
+            ->ensureCartIsNotLocked($cart)
+            ->ensureCartIsNotEmpty($cart)
+        ;
 
-        $eventDispatcher->dispatch(CartEvents::UPDATED, new CartEvent($cart));
+        $item = $this->getDoctrine()->getRepository('EkynaOrderBundle:OrderItem')->find($request->attributes->get('itemId'));
+        if (null === $item || !$cart->hasItem($item)) {
+            $messageType = 'danger';
+            $message = 'Article introuvable.';
+        } else {
+            $eventDispatcher = $this->get('event_dispatcher');
+            $eventDispatcher->dispatch(OrderEvents::PRE_CONTENT_CHANGE, new OrderEvent($cart));
 
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($cart);
-        $em->flush();
+            $cart->removeItem($item);
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($item);
+            $em->flush();
 
-        $eventDispatcher->dispatch(CartEvents::SAVED, new CartEvent($cart));
+            $eventDispatcher->dispatch(OrderEvents::POST_CONTENT_CHANGE, new OrderEvent($cart));
+
+            $message = sprintf(
+                'L\'article "%s" a bien été supprimé de <a href="%s">votre panier</a>.',
+                $item->getProduct()->getDesignation(),
+                $this->generateUrl('ekyna_cart_index')
+            );
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            // TODO
+            return new Response();
+        }
+
+        $this->get('session')->getFlashBag()->add($messageType, $message);
+
+        if(null !== $referer = $request->headers->get('referer', null)) {
+            return $this->redirect($referer);
+        }
+
+        return $this->redirect($this->generateUrl('ekyna_cart_index'));
+    }
+
+    private function ensureCartIsNotLocked(OrderInterface $cart)
+    {
+        if ($cart->getLocked()) {
+            $exception = new RedirectException('Votre panier est vérouillé pour paiement et ne peut être modifié.');
+            $exception->setUri($this->generateUrl('ekyna_cart_index'));
+            $exception->setMessageType('warning');
+            throw $exception;
+        }
+
+        return $this;
+    }
+
+    private function ensureCartIsNotEmpty(OrderInterface $cart)
+    {
+        if ($cart->isEmpty()) {
+            $exception = new RedirectException('Votre panier est vide.');
+            $exception->setUri($this->generateUrl('ekyna_cart_index'));
+            $exception->setMessageType('warning');
+            throw $exception;
+        }
+
+        return $this;
     }
 }
