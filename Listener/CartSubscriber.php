@@ -63,8 +63,8 @@ class CartSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
     	return array(
-    		OrderEvents::POST_CONTENT_CHANGE => array('onOrderPostContentChange', 0),
-    		OrderEvents::POST_STATE_CHANGE   => array('onOrderPostStateChange',   0),
+    		OrderEvents::POST_CONTENT_CHANGE => array('onOrderPostContentChange', 256),
+    		OrderEvents::POST_STATE_CHANGE   => array('onOrderPostStateChange',   256),
     	);
     }
 }
