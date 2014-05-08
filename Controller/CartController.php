@@ -191,17 +191,23 @@ class CartController extends Controller
 
         $httpRequestVerifier->invalidate($token);
 
+        $success = false;
         if (in_array($payment->getState(), array(PaymentStates::STATE_SUCCESS, PaymentStates::STATE_COMPLETED))) {
             $this->get('session')->getFlashBag()->set('success', 'ekyna_payment.success.message');
+            $success = true;
         } else if ($payment->getState() == PaymentStates::STATE_PENDING) {
             $this->get('session')->getFlashBag()->set('warning', 'ekyna_payment.pending.message');
+            $success = true;
         } else {
             $this->get('session')->getFlashBag()->set('danger', 'ekyna_payment.failed.message');
-            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
         }
 
         $this->get('event_dispatcher')->dispatch(OrderEvents::POST_PAYMENT_PROCESS, new OrderEvent($cart));
-        
+
+        if (!$success) {
+            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
+        }
+
         return $this->redirect($this->generateUrl('ekyna_cart_confirmation'));
     }
 
