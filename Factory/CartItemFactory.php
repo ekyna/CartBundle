@@ -86,7 +86,7 @@ class CartItemFactory implements CartItemFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function createItemFromProduct(ProductInterface $product, array $options = array())
+    public function createItemFromProduct(ProductInterface $product, array $options = array(), array $extras = array())
     {
         $item = new OrderItem();
 
@@ -98,6 +98,7 @@ class CartItemFactory implements CartItemFactoryInterface
             ->setTax($product->getTax())
             ->setWeight($product->getWeight())
             ->setQuantity(1)
+            ->setExtras($extras)
         ;
 
         foreach ($options as $option) {
