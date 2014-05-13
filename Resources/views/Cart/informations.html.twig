@@ -38,7 +38,7 @@
 	<div class="row">
 		<div class="col-md-12" style="text-align:right">
 			{{ form_rest(form) }}
-	        <a href="{{ path('ekyna_user_address_new') }}" class="btn btn-default">{{ 'ekyna_user.account.address.new'|trans }}</a>
+	        <a href="{{ path('ekyna_user_address_new', {'_continue': path('ekyna_cart_informations')}) }}" class="btn btn-default">{{ 'ekyna_user.account.address.new'|trans }}</a>
 			<button type="submit" class="btn btn-primary">Valider</button>
 		</div>
 	</div>
