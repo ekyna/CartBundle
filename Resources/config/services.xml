@@ -6,13 +6,10 @@
 
     <parameters>
         <parameter key="ekyna_cart.cart_provider.class">Ekyna\Bundle\CartBundle\Provider\CartProvider</parameter>
-        <parameter key="ekyna_cart.cart_subscriber.class">Ekyna\Bundle\CartBundle\Listener\CartSubscriber</parameter>
-
-        <parameter key="ekyna_cart.cart_item.factory.class">Ekyna\Bundle\CartBundle\Factory\CartItemFactory</parameter>
+        <parameter key="ekyna_cart.cart_subscriber.class">Ekyna\Bundle\CartBundle\EventListener\CartSubscriber</parameter>
 
         <parameter key="ekyna_cart.cart.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartType</parameter>
         <parameter key="ekyna_cart.cart_item.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartItemType</parameter>
-        <parameter key="ekyna_cart.add_cart_item.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\AddCartItemType</parameter>
         <parameter key="ekyna_cart.cart_addresses.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartAddressesType</parameter>
         <parameter key="ekyna_cart.cart_address_choice.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartAddressChoiceType</parameter>
 
@@ -34,13 +31,6 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
-        <!-- CartItem Factory -->
-        <service id="ekyna_cart.cart_item.factory" class="%ekyna_cart.cart_item.factory.class%">
-            <argument type="service" id="form.factory" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="router" />
-        </service>
-
         <!-- Form Types -->
         <service id="ekyna_cart.cart.form_type" class="%ekyna_cart.cart.form_type.class%">
             <argument>%ekyna_order.order.class%</argument>
@@ -49,10 +39,6 @@
         <service id="ekyna_cart.cart_item.form_type" class="%ekyna_cart.cart_item.form_type.class%">
             <argument>%ekyna_order.order_item.class%</argument>
             <tag name="form.type" alias="ekyna_cart_item" />
-        </service>
-        <service id="ekyna_cart.add_cart_item.form_type" class="%ekyna_cart.add_cart_item.form_type.class%">
-            <argument>%ekyna_product.options.configuration%</argument>
-            <tag name="form.type" alias="ekyna_add_cart_item" />
         </service>
         <service id="ekyna_cart.cart_addresses.form_type" class="%ekyna_cart.cart_addresses.form_type.class%">
             <argument>%ekyna_order.order.class%</argument>

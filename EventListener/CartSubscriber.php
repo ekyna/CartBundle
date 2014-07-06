@@ -1,6 +1,6 @@
 <?php
 
-namespace Ekyna\Bundle\CartBundle\Listener;
+namespace Ekyna\Bundle\CartBundle\EventListener;
 
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
@@ -31,11 +31,11 @@ class CartSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * Order post content change event handler.
+     * Content change event handler.
      * 
      * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
      */
-    public function onOrderPostContentChange(OrderEvent $event)
+    public function onContentChange(OrderEvent $event)
     {
         $order = $event->getOrder();
         if ($order->getType() == OrderInterface::TYPE_CART) {
@@ -44,15 +44,28 @@ class CartSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * Order post state change event handler.
+     * State change event handler.
      *
      * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
      */
-    public function onOrderPostStateChange(OrderEvent $event)
+    public function onStateChange(OrderEvent $event)
     {
         $order = $event->getOrder();
         $cart  = $this->provider->getCart();
         if ($order->getId() == $cart->getId() && $order->getType() != OrderInterface::TYPE_CART) {
+            $this->provider->clearCart();
+        }
+    }
+
+    /**
+     * Delete event handler.
+     * 
+     * @param OrderEvent $event
+     */
+    public function onDelete(OrderEvent $event)
+    {
+        $order = $event->getOrder();
+        if ($order->getType() == OrderInterface::TYPE_CART) {
             $this->provider->clearCart();
         }
     }
@@ -63,8 +76,9 @@ class CartSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
     	return array(
-    		OrderEvents::POST_CONTENT_CHANGE => array('onOrderPostContentChange', 256),
-    		OrderEvents::POST_STATE_CHANGE   => array('onOrderPostStateChange',   256),
+    		OrderEvents::CONTENT_CHANGE => array('onContentChange', -1024),
+    		OrderEvents::STATE_CHANGE   => array('onStateChange',   -1024),
+    		OrderEvents::DELETE         => array('onDelete',        -1024),
     	);
     }
 }

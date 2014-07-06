@@ -56,6 +56,13 @@ ekyna_cart_confirmation:
     requirements:
         _method: GET|POST
 
+ekyna_cart_reset:
+    pattern: /cart/reset
+    defaults:
+        _controller: EkynaCartBundle:Cart:reset
+    requirements:
+        _method: GET
+
 ekyna_cart_add_item:
     pattern: /cart/add-item
     defaults:
