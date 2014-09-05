@@ -2,32 +2,16 @@
 
 namespace Ekyna\Bundle\CartBundle\Form\Type;
 
-use Symfony\Component\Form\AbstractType;
+use Ekyna\Bundle\AdminBundle\Form\Type\ResourceFormType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
  * CartItemType
  *
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
-class CartItemType extends AbstractType
+class CartItemType extends ResourceFormType
 {
-    /**
-     * @var string
-     */
-    protected $dataClass;
-
-    /**
-     * Constructor.
-     * 
-     * @param string $dataClass
-     */
-    public function __construct($dataClass)
-    {
-        $this->dataClass = $dataClass;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -35,18 +19,6 @@ class CartItemType extends AbstractType
     {
         $builder
             ->add('quantity', 'integer', array('attr' => array('min' => 1)))
-        ;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
-    {
-        $resolver
-            ->setDefaults(array(
-                'data_class' => $this->dataClass,
-            ))
         ;
     }
 
