@@ -10,6 +10,7 @@
 <hr>
 {% form_theme form 'EkynaCartBundle:Form:form_div_layout.html.twig' %}
 {{ bootstrap_set_style('horizontal') }}
+{{ form_errors(form) }}
 <form action="{{ path('ekyna_cart_informations') }}" method="post" class="form-horizontal">
     {% set enable_shipment = cart.requiresShipment %}
     {% set column_size = enable_shipment ? 4 : 6 %}
