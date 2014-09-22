@@ -2,7 +2,6 @@
 
 namespace Ekyna\Bundle\CartBundle\Controller;
 
-use Ekyna\Bundle\AdminBundle\Event\ResourceEvent;
 use Ekyna\Bundle\CoreBundle\Controller\Controller;
 use Ekyna\Bundle\OrderBundle\Entity\OrderPayment;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
@@ -38,7 +37,7 @@ class CartController extends Controller
                     return $this->redirect($this->generateUrl('ekyna_cart_informations'));
                 }
             } else {
-                $this->displayResourceEventMessages($event);
+                $event->toFlashes($this->getFlashBag());
                 //return $this->redirect($this->generateUrl('ekyna_cart_index'));
             }
         }
@@ -77,7 +76,7 @@ class CartController extends Controller
                 }
                 return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             } else {
-                $this->displayResourceEventMessages($event);
+                $event->toFlashes($this->getFlashBag());
                 //return $this->redirect($this->generateUrl('ekyna_cart_informations'));
             }
         }
@@ -92,7 +91,7 @@ class CartController extends Controller
         );
     }
 
-    public function shippingAction(Request $request)
+    public function shippingAction()
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirect($this->generateUrl('fos_user_security_login'));
@@ -156,7 +155,7 @@ class CartController extends Controller
                 );
                 return $this->redirect($captureToken->getTargetUrl());
             } else {
-                $this->displayResourceEventMessages($event);
+                $event->toFlashes($this->getFlashBag());
                 //return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             }
         }
@@ -195,7 +194,7 @@ class CartController extends Controller
         $event = new OrderEvent($cart);
         $this->getDispatcher()->dispatch(OrderEvents::PAYMENT_COMPLETE, $event);
         if ($event->isPropagationStopped()) {
-            $this->displayResourceEventMessages($event);
+            $event->toFlashes($this->getFlashBag());
         }
 
         if (!$success) {
@@ -226,7 +225,7 @@ class CartController extends Controller
         if (!$event->hasErrors()) {
             $this->addFlash('ekyna_cart.event.reset');
         } else {
-            $this->displayResourceEventMessages($event);
+            $event->toFlashes($this->getFlashBag());
         }
 
         return $this->redirectAfterContentChange($request);
@@ -249,7 +248,7 @@ class CartController extends Controller
                 '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
             )));
         } else {
-            $this->displayResourceEventMessages($event);
+            $event->toFlashes($this->getFlashBag());
         }
 
         if ($request->isXmlHttpRequest()) {
@@ -279,7 +278,7 @@ class CartController extends Controller
                 '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
             )));
         } else {
-            $this->displayResourceEventMessages($event);
+            $event->toFlashes($this->getFlashBag());
         }
 
         if ($request->isXmlHttpRequest()) {
@@ -303,17 +302,5 @@ class CartController extends Controller
         }
 
         return $this->redirect($this->generateUrl('ekyna_cart_index'));
-    }
-
-    /**
-     * Converts a ResourceEvent into session flashes.
-     *
-     * @param ResourceEvent $event
-     */
-    protected function displayResourceEventMessages(ResourceEvent $event)
-    {
-        foreach($event->getMessages() as $message) {
-            $this->addFlash($message->getMessage(), $message->getType());
-        }
     }
 }
