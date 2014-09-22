@@ -18,7 +18,6 @@
     ],
     "require" : {
         "php" : ">=5.4",
-        "symfony/framework-bundle" : "~2.3",
         "ekyna/order-bundle" : "0.1.*@dev"
     },
     "autoload" : {
