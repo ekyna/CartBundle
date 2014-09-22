@@ -9,21 +9,21 @@ use Ekyna\Component\Sale\Order\OrderInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * CartSubscriber.
- *
+ * Class CartSubscriber
+ * @package Ekyna\Bundle\CartBundle\EventListener
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var \Ekyna\Bundle\CartBundle\Model\CartProviderInterface
+     * @var CartProviderInterface
      */
-    private $provider;
+    protected $provider;
 
     /**
      * Constructor.
      *
-     * @param \Ekyna\Bundle\CartBundle\Model\CartProviderInterface $provider
+     * @param CartProviderInterface $provider
      */
     public function __construct(CartProviderInterface $provider)
     {
@@ -65,7 +65,7 @@ class CartSubscriber implements EventSubscriberInterface
     public function onDelete(OrderEvent $event)
     {
         $order = $event->getOrder();
-        if ($order->getType() == OrderInterface::TYPE_CART) {
+        if ($order->getType() === OrderInterface::TYPE_CART) {
             $this->provider->clearCart();
         }
     }
