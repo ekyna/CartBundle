@@ -257,7 +257,7 @@ class CartController extends Controller
     {
         $cart = $this->getCart();
         $event = new OrderEvent($cart);
-        $this->getOperator('ekyna_order.order')->delete($event, true);
+        $this->get('ekyna_order.order.operator')->delete($event, true);
         if (!$event->hasErrors()) {
             $this->addFlash('ekyna_cart.event.reset');
         } else {
