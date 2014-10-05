@@ -20,10 +20,16 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class CartController extends Controller
 {
+    /**
+     * Index action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function indexAction(Request $request)
     {
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
-
+        $cart = $this->getCart();
         $form = $this->createForm('ekyna_cart', $cart);
 
         $form->handleRequest($request);
@@ -38,19 +44,23 @@ class CartController extends Controller
                 }
             } else {
                 $event->toFlashes($this->getFlashBag());
-                //return $this->redirect($this->generateUrl('ekyna_cart_index'));
             }
+            return $this->redirect($this->generateUrl('ekyna_cart_index'));
         }
 
-        return $this->render(
-            'EkynaCartBundle:Cart:index.html.twig',
-            array(
-                'cart' => $cart,
-                'form' => $form->createView()
-            )
-        );
+        return $this->render('EkynaCartBundle:Cart:index.html.twig', array(
+            'cart' => $cart,
+            'form' => $form->createView()
+        ));
     }
 
+    /**
+     * Informations action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function informationsAction(Request $request)
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -58,7 +68,7 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
 
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $cart = $this->getCart();
         $user = $this->getUser();
         $cart->setUser($user);
 
@@ -77,27 +87,29 @@ class CartController extends Controller
                 return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             } else {
                 $event->toFlashes($this->getFlashBag());
-                //return $this->redirect($this->generateUrl('ekyna_cart_informations'));
             }
+            return $this->redirect($this->generateUrl('ekyna_cart_informations'));
         }
 
-        return $this->render(
-            'EkynaCartBundle:Cart:informations.html.twig',
-            array(
-                'form' => $form->createView(),
-                'cart' => $cart,
-                'user' => $user,
-            )
-        );
+        return $this->render('EkynaCartBundle:Cart:informations.html.twig', array(
+            'form' => $form->createView(),
+            'cart' => $cart,
+            'user' => $user,
+        ));
     }
 
+    /**
+     * Shipping action.
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function shippingAction()
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
 
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $cart = $this->getCart();
 
         // Go to payment page if no shipment required
         if (!$cart->requiresShipment()) {
@@ -115,27 +127,34 @@ class CartController extends Controller
                 return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             } else {
                 $this->displayResourceEventMessages($event);
-                //return $this->redirect($this->generateUrl('ekyna_cart_shipping'));
+
             }
+            return $this->redirect($this->generateUrl('ekyna_cart_shipping'));
         }*/
 
-        return $this->render(
-            'EkynaCartBundle:Cart:shipping.html.twig',
-            array(
-//                 'form' => $form->createView(),
-//                 'cart' => $cart,
-//         	    'user' => $user,
-            )
-        );
+        return $this->render('EkynaCartBundle:Cart:shipping.html.twig', array(
+//           'form' => $form->createView(),
+//           'cart' => $cart,
+//         	 'user' => $user,
+        ));
     }
 
+    /**
+     * Payment action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function paymentAction(Request $request)
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
 
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $cart = $this->getCart();
+        // TODO Payment choice form
+        // $form = $this->createForm('ekyna_cart_payment', $cart);
 
         if (null !== $method = $request->query->get('method', null)) {
             $payment = new OrderPayment();
@@ -156,13 +175,20 @@ class CartController extends Controller
                 return $this->redirect($captureToken->getTargetUrl());
             } else {
                 $event->toFlashes($this->getFlashBag());
-                //return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             }
+            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
         }
 
         return $this->render('EkynaCartBundle:Cart:payment.html.twig');
     }
 
+    /**
+     * Payment check action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function paymentCheckAction(Request $request)
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -204,6 +230,11 @@ class CartController extends Controller
         return $this->redirect($this->generateUrl('ekyna_cart_confirmation'));
     }
 
+    /**
+     * Confirmation action.
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function confirmationAction()
     {
         if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -215,13 +246,18 @@ class CartController extends Controller
         );
     }
 
+    /**
+     * Reset action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function resetAction(Request $request)
     {
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
-
+        $cart = $this->getCart();
         $event = new OrderEvent($cart);
-        $this->getDispatcher()->dispatch(OrderEvents::DELETE, $event);
-        // Event propagation is stopped without errors.
+        $this->getOperator('ekyna_order.order')->delete($event, true);
         if (!$event->hasErrors()) {
             $this->addFlash('ekyna_cart.event.reset');
         } else {
@@ -231,9 +267,18 @@ class CartController extends Controller
         return $this->redirectAfterContentChange($request);
     }
 
+    /**
+     * Add item action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
     public function addItemAction(Request $request)
     {
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $cart = $this->getCart();
         $item = $this->get('ekyna_order.order_item.factory')->createItemFromRequest($request);
 
         if (null === $item) {
@@ -259,9 +304,18 @@ class CartController extends Controller
         return $this->redirectAfterContentChange($request);
     }
 
+    /**
+     * Remove item action.
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
     public function removeItemAction(Request $request)
     {
-        $cart = $this->get('ekyna_cart.cart_provider')->getCart();
+        $cart = $this->getCart();
         $item = $this->getDoctrine()
             ->getRepository('EkynaOrderBundle:OrderItem')
             ->find($request->attributes->get('itemId'));
@@ -271,7 +325,7 @@ class CartController extends Controller
         }
 
         $event = new OrderItemEvent($cart, $item);
-        $this->getDispatcher()->dispatch(OrderEvents::ITEM_ADD, $event);
+        $this->getDispatcher()->dispatch(OrderEvents::ITEM_REMOVE, $event);
         if (!$event->isPropagationStopped()) {
             $this->addFlash($this->getTranslator()->trans('ekyna_cart.event.item_remove', array(
                 '{{ name }}' => $item->getProduct()->getDesignation(),
@@ -293,6 +347,7 @@ class CartController extends Controller
      * Redirects after order content changed.
      *
      * @param Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     protected function redirectAfterContentChange(Request $request)
@@ -302,5 +357,15 @@ class CartController extends Controller
         }
 
         return $this->redirect($this->generateUrl('ekyna_cart_index'));
+    }
+
+    /**
+     * Returns the cart.
+     *
+     * @return \Ekyna\Component\Sale\Order\OrderInterface
+     */
+    protected function getCart()
+    {
+        return $this->get('ekyna_cart.cart.provider')->getCart();
     }
 }

@@ -58,11 +58,11 @@ class CartSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * Delete event handler.
+     * Post delete event handler.
      * 
      * @param OrderEvent $event
      */
-    public function onDelete(OrderEvent $event)
+    public function onPostDelete(OrderEvent $event)
     {
         $order = $event->getOrder();
         if ($order->getType() === OrderInterface::TYPE_CART) {
@@ -78,7 +78,7 @@ class CartSubscriber implements EventSubscriberInterface
     	return array(
     		OrderEvents::CONTENT_CHANGE => array('onContentChange', -1024),
     		OrderEvents::STATE_CHANGE   => array('onStateChange',   -1024),
-    		OrderEvents::DELETE         => array('onDelete',        -1024),
+    		OrderEvents::POST_DELETE    => array('onPostDelete',    -1024),
     	);
     }
 }

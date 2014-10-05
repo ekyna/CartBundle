@@ -8,8 +8,8 @@ use Ekyna\Component\Sale\Order\OrderInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
- * CartProvider.
- *
+ * Class CartProvider
+ * @package Ekyna\Bundle\CartBundle\Provider
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartProvider implements CartProviderInterface
