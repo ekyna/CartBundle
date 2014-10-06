@@ -7,14 +7,14 @@ use Ekyna\Component\Sale\Product\ProductInterface;
 use Symfony\Component\Form\FormView;
 
 /**
- * CartExtension.
- *
+ * Class CartExtension
+ * @package Ekyna\Bundle\CartBundle\Twig
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartExtension extends \Twig_Extension
 {
     /**
-     * @var \Ekyna\Bundle\CartBundle\Model\CartProviderInterface
+     * @var CartProviderInterface
      */
     protected $cartProvider;
 
@@ -32,8 +32,8 @@ class CartExtension extends \Twig_Extension
     /**
      * Constructor.
      *
-     * @param \Ekyna\Bundle\CartBundle\Model\CartProviderInterface $cartProvider
-     * @param \Twig_Environment $twig
+     * @param CartProviderInterface $cartProvider
+     * @param array $options
      */
     public function __construct(CartProviderInterface $cartProvider, array $options)
     {
@@ -73,7 +73,7 @@ class CartExtension extends \Twig_Extension
      * 
      * @param array $options
      *
-     * @param string $template
+     * @return string
      */
     public function renderCartWidget(array $options = array())
     {
