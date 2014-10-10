@@ -5,15 +5,15 @@ namespace Ekyna\Bundle\CartBundle\EventListener;
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvents;
-use Ekyna\Component\Sale\Order\OrderInterface;
+use Ekyna\Component\Sale\Order\OrderTypes;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class CartSubscriber
+ * Class CartListener
  * @package Ekyna\Bundle\CartBundle\EventListener
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
-class CartSubscriber implements EventSubscriberInterface
+class CartListener implements EventSubscriberInterface
 {
     /**
      * @var CartProviderInterface
@@ -33,12 +33,12 @@ class CartSubscriber implements EventSubscriberInterface
     /**
      * Content change event handler.
      * 
-     * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
+     * @param OrderEvent $event
      */
     public function onContentChange(OrderEvent $event)
     {
         $order = $event->getOrder();
-        if ($order->getType() == OrderInterface::TYPE_CART) {
+        if ($order->getType() == OrderTypes::TYPE_CART) {
             $this->provider->setCart($order);
         }
     }
@@ -46,13 +46,13 @@ class CartSubscriber implements EventSubscriberInterface
     /**
      * State change event handler.
      *
-     * @param \Ekyna\Bundle\OrderBundle\Event\OrderEvent $event
+     * @param OrderEvent $event
      */
     public function onStateChange(OrderEvent $event)
     {
         $order = $event->getOrder();
         $cart  = $this->provider->getCart();
-        if ($order->getId() == $cart->getId() && $order->getType() != OrderInterface::TYPE_CART) {
+        if ($order->getId() == $cart->getId() && $order->getType() != OrderTypes::TYPE_CART) {
             $this->provider->clearCart();
         }
     }
@@ -65,7 +65,7 @@ class CartSubscriber implements EventSubscriberInterface
     public function onPostDelete(OrderEvent $event)
     {
         $order = $event->getOrder();
-        if ($order->getType() === OrderInterface::TYPE_CART) {
+        if ($order->getType() === OrderTypes::TYPE_CART) {
             $this->provider->clearCart();
         }
     }

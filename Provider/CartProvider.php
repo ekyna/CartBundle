@@ -5,6 +5,7 @@ namespace Ekyna\Bundle\CartBundle\Provider;
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
 use Ekyna\Bundle\OrderBundle\Entity\OrderRepository;
 use Ekyna\Component\Sale\Order\OrderInterface;
+use Ekyna\Component\Sale\Order\OrderTypes;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
@@ -17,17 +18,17 @@ class CartProvider implements CartProviderInterface
     const KEY = 'cart_id';
 
     /**
-     * @var \Symfony\Component\HttpFoundation\Session\SessionInterface
+     * @var SessionInterface
      */
     protected $session;
 
     /**
-     * @var \Ekyna\Bundle\OrderBundle\Entity\OrderRepository
+     * @var OrderRepository
      */
     protected $repository;
 
     /**
-     * @var \Ekyna\Component\Sale\Order\OrderInterface
+     * @var OrderInterface
      */
     protected $cart;
 
@@ -40,14 +41,15 @@ class CartProvider implements CartProviderInterface
     /**
      * Constructor.
      * 
-     * @param \Symfony\Component\HttpFoundation\Session\SessionInterface $session
-     * @param \Ekyna\Bundle\OrderBundle\Entity\OrderRepository           $repository
+     * @param SessionInterface $session
+     * @param OrderRepository  $repository
+     * @param string           $key
      */
-    public function __construct(SessionInterface $session, OrderRepository $repository)
+    public function __construct(SessionInterface $session, OrderRepository $repository, $key = self::KEY)
     {
         $this->session = $session;
         $this->repository = $repository;
-        $this->key = self::KEY;
+        $this->key = $key;
     }
 
     /**
@@ -56,7 +58,7 @@ class CartProvider implements CartProviderInterface
     public function setCart(OrderInterface $cart)
     {
         $this->cart = $cart;
-        $this->cart->setType(OrderInterface::TYPE_CART);
+        $this->cart->setType(OrderTypes::TYPE_CART);
         $this->session->set($this->key, $cart->getId());
     }
 
@@ -75,7 +77,7 @@ class CartProvider implements CartProviderInterface
     public function newCart()
     {
         $this->clearCart();
-        $this->setCart($this->repository->createNew(OrderInterface::TYPE_CART));
+        $this->setCart($this->repository->createNew(OrderTypes::TYPE_CART));
 
         return $this->cart;
     }
@@ -87,7 +89,7 @@ class CartProvider implements CartProviderInterface
     {
         if(null === $this->cart) {
             if(null !== $cartId = $this->session->get($this->key, null)) {
-                if (null !== $cart = $this->repository->findOneBy(array('id' => $cartId, 'type' => OrderInterface::TYPE_CART))) {
+                if (null !== $cart = $this->repository->findOneBy(array('id' => $cartId, 'type' => OrderTypes::TYPE_CART))) {
                     $this->setCart($cart);
                 }
             }

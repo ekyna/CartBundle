@@ -6,7 +6,7 @@
 
     <parameters>
         <parameter key="ekyna_cart.cart.provider.class">Ekyna\Bundle\CartBundle\Provider\CartProvider</parameter>
-        <parameter key="ekyna_cart.cart.event_subscriber.class">Ekyna\Bundle\CartBundle\EventListener\CartSubscriber</parameter>
+        <parameter key="ekyna_cart.cart.listener.class">Ekyna\Bundle\CartBundle\EventListener\CartListener</parameter>
 
         <parameter key="ekyna_cart.cart.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartType</parameter>
         <parameter key="ekyna_cart.cart_item.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartItemType</parameter>
@@ -25,8 +25,8 @@
             <argument type="service" id="ekyna_order.order.repository" />
         </service>
 
-        <!-- Events subscriber -->
-        <service id="ekyna_cart.cart.event_subscriber" class="%ekyna_cart.cart.event_subscriber.class%">
+        <!-- Event listener -->
+        <service id="ekyna_cart.cart.listener" class="%ekyna_cart.cart.listener.class%">
             <argument type="service" id="ekyna_cart.cart.provider" />
             <tag name="kernel.event_subscriber" />
         </service>
