@@ -63,9 +63,8 @@ class CartController extends Controller
      */
     public function informationsAction(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $request->getSession()->set('_ekyna.login_success.target_path', 'ekyna_cart_informations');
-            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        if (null !== $redirect = $this->securityCheck($request)) {
+            return $redirect;
         }
 
         $cart = $this->getCart();
@@ -101,12 +100,14 @@ class CartController extends Controller
     /**
      * Shipping action.
      *
+     * @param Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function shippingAction()
+    public function shippingAction(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        if (null !== $redirect = $this->securityCheck($request)) {
+            return $redirect;
         }
 
         $cart = $this->getCart();
@@ -148,8 +149,8 @@ class CartController extends Controller
      */
     public function paymentAction(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        if (null !== $redirect = $this->securityCheck($request)) {
+            return $redirect;
         }
 
         $cart = $this->getCart();
@@ -191,8 +192,8 @@ class CartController extends Controller
      */
     public function paymentCheckAction(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        if (null !== $redirect = $this->securityCheck($request)) {
+            return $redirect;
         }
 
         $httpRequestVerifier = $this->get('payum.security.http_request_verifier');
@@ -233,12 +234,14 @@ class CartController extends Controller
     /**
      * Confirmation action.
      *
+     * @param Request $request
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function confirmationAction()
+    public function confirmationAction(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        if (null !== $redirect = $this->securityCheck($request)) {
+            return $redirect;
         }
 
         return $this->render(
@@ -341,6 +344,21 @@ class CartController extends Controller
         }
 
         return $this->redirectAfterContentChange($request);
+    }
+
+    /**
+     * Check that user is logged.
+     *
+     * @param Request $request
+     * @return null|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    protected function securityCheck(Request $request)
+    {
+        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $request->getSession()->set('_ekyna.login_success.target_path', 'ekyna_cart_informations');
+            return $this->redirect($this->generateUrl('fos_user_security_login'));
+        }
+        return null;
     }
 
     /**
