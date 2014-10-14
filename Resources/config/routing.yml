@@ -6,6 +6,9 @@ ekyna_cart_index:
             name: Mon panier
             footer: true
             position: 98
+            seo:
+                follow: false
+                index: false
     requirements:
         _method: GET|POST
 
