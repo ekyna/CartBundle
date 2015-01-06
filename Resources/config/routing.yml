@@ -4,7 +4,7 @@ ekyna_cart_index:
         _controller: EkynaCartBundle:Cart:index
         _cms:
             name: Mon panier
-            footer: true
+            menus: [footer]
             position: 98
             seo:
                 follow: false
