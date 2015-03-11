@@ -10,8 +10,8 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
 
 /**
- * CartAddressesType.
- *
+ * Class CartAddressesType
+ * @package Ekyna\Bundle\CartBundle\Form\Type
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartAddressesType extends AbstractType

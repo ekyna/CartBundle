@@ -6,8 +6,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * CartAdressChoiceType.
- *
+ * Class CartAddressChoiceType
+ * @package Ekyna\Bundle\CartBundle\Form\Type
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartAddressChoiceType extends AbstractType

@@ -6,8 +6,8 @@ use Ekyna\Bundle\AdminBundle\Form\Type\ResourceFormType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
- * CartItemType
- *
+ * Class CartItemType
+ * @package Ekyna\Bundle\CartBundle\Form\Type
  * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class CartItemType extends ResourceFormType
