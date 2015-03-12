@@ -24,7 +24,6 @@ class CartType extends ResourceFormType
                 'allow_add'    => true,
                 'allow_delete' => true,
                 'allow_sort'   => false, // TODO ?
-                'by_reference' => false,
                 'add_button_text' => 'ekyna_core.button.add',
                 'sub_widget_col'  => 11,
                 'button_col'      => 1,
