@@ -5,7 +5,6 @@ namespace Ekyna\Bundle\CartBundle\Form\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
 

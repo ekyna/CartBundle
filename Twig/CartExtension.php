@@ -3,8 +3,6 @@
 namespace Ekyna\Bundle\CartBundle\Twig;
 
 use Ekyna\Bundle\CartBundle\Model\CartProviderInterface;
-use Ekyna\Component\Sale\Product\ProductInterface;
-use Symfony\Component\Form\FormView;
 
 /**
  * Class CartExtension

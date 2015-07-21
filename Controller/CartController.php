@@ -256,7 +256,7 @@ class CartController extends Controller
             $message = 'ekyna_cart.message.item_remove.failure';
             $type    = 'danger';
         }
-        $this->addFlash($this->getTranslator()->trans('ekyna_cart.message.item_remove.failure', array(
+        $this->addFlash($this->getTranslator()->trans($message, array(
             '{{ name }}' => $item->getDesignation(),
             '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
         )), $type);
