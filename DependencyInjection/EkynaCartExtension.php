@@ -2,15 +2,15 @@
 
 namespace Ekyna\Bundle\CartBundle\DependencyInjection;
 
+use Ekyna\Bundle\CoreBundle\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
 /**
- * This is the class that loads and manages your bundle configuration
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
+ * Class EkynaCartExtension
+ * @package Ekyna\Bundle\CartBundle\DependencyInjection
+ * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class EkynaCartExtension extends Extension
 {
@@ -24,5 +24,25 @@ class EkynaCartExtension extends Extension
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
+
+        $exposedConfig = [];
+        $exposedConfig['templates'] = $config['templates'];
+
+        $container->setParameter('ekyna_cart.config', $exposedConfig);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function prepend(ContainerBuilder $container)
+    {
+        parent::prepend($container);
+
+        $bundles = $container->getParameter('kernel.bundles');
+        if (array_key_exists('AsseticBundle', $bundles)) {
+            $container->prependExtensionConfig('assetic', array(
+                'bundles' => array('EkynaCartBundle')
+            ));
+        }
     }
 }

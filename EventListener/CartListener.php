@@ -31,11 +31,11 @@ class CartListener implements EventSubscriberInterface
     }
 
     /**
-     * Content change event handler.
+     * Order post content change event handler.
      * 
      * @param OrderEvent $event
      */
-    public function onContentChange(OrderEvent $event)
+    public function onPostContentChange(OrderEvent $event)
     {
         $order = $event->getOrder();
         if ($order->getType() == OrderTypes::TYPE_CART) {
@@ -44,15 +44,15 @@ class CartListener implements EventSubscriberInterface
     }
 
     /**
-     * State change event handler.
+     * Order post state change event handler.
      *
      * @param OrderEvent $event
      */
-    public function onStateChange(OrderEvent $event)
+    public function onPostStateChange(OrderEvent $event)
     {
         $order = $event->getOrder();
         $cart  = $this->provider->getCart();
-        if ($order->getId() == $cart->getId() && $order->getType() != OrderTypes::TYPE_CART) {
+        if ($order->getId() === $cart->getId() && $order->getType() !== OrderTypes::TYPE_CART) {
             $this->provider->clearCart();
         }
     }
@@ -76,8 +76,8 @@ class CartListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
     	return array(
-    		OrderEvents::CONTENT_CHANGE => array('onContentChange', -1024),
-    		OrderEvents::STATE_CHANGE   => array('onStateChange',   -1024),
+    		OrderEvents::CONTENT_CHANGE => array('onPostContentChange', -1024),
+    		OrderEvents::STATE_CHANGE   => array('onPostStateChange',   -1024),
     		OrderEvents::POST_DELETE    => array('onPostDelete',    -1024),
     	);
     }

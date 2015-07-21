@@ -6,9 +6,9 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This is the class that validates and merges configuration from your app/config files
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html#cookbook-bundles-extension-config-class}
+ * Class Configuration
+ * @package Ekyna\Bundle\CartBundle\DependencyInjection
+ * @author Étienne Dauvergne <contact@ekyna.com>
  */
 class Configuration implements ConfigurationInterface
 {
@@ -20,9 +20,20 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('ekyna_cart');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->arrayNode('templates')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('base')->defaultValue('EkynaCartBundle::base.html.twig')->end()
+                        ->scalarNode('email')->defaultValue('EkynaCartBundle::email.html.twig')->end()
+                        ->scalarNode('widget')->defaultValue('EkynaCartBundle:Cart:_widget.html.twig')->end()
+                        ->scalarNode('summary')->defaultValue('EkynaCartBundle:Cart:_summary.html.twig')->end()
+//                        ->scalarNode('add_to_cart')->defaultValue('EkynaCartBundle:Cart:_add_to_cart.html.twig')->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }

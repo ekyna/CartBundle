@@ -1,5 +1,6 @@
 <div class="form-body add-to-cart">
 	{{ bootstrap_set_style('horizontal') }}
+    {{ bootstrap_set_col_size('md') }}
 	{{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}
     {{ form_errors(form) }}
 	{% for group in options %}

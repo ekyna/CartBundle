@@ -2,6 +2,9 @@ ekyna_cart_index:
     pattern: /cart/index
     defaults:
         _controller: EkynaCartBundle:Cart:index
+    requirements:
+        _method: GET|POST
+    options:
         _cms:
             name: Mon panier
             menus: [footer]
@@ -9,55 +12,51 @@ ekyna_cart_index:
             seo:
                 follow: false
                 index: false
-    requirements:
-        _method: GET|POST
 
 ekyna_cart_informations:
     pattern: /cart/informations
     defaults:
         _controller: EkynaCartBundle:Cart:informations
+    requirements:
+        _method: GET|POST
+    options:
         _cms:
             parent: ekyna_cart_index
             name: Mes informations
+
+ekyna_cart_shipment:
+    pattern: /cart/shipment
+    defaults:
+        _controller: EkynaCartBundle:Cart:shipment
     requirements:
         _method: GET|POST
-
-ekyna_cart_shipping:
-    pattern: /cart/shipping-mode
-    defaults:
-        _controller: EkynaCartBundle:Cart:shipping
+    options:
         _cms:
             parent: ekyna_cart_index
             name: Mode de livraisons
-    requirements:
-        _method: GET|POST
 
 ekyna_cart_payment:
-    pattern: /cart/payment-method
+    pattern: /cart/payment
     defaults:
         _controller: EkynaCartBundle:Cart:payment
+    requirements:
+        _method: GET|POST
+    options:
         _cms:
             parent: ekyna_cart_index
             name: Moyen de paiement
-    requirements:
-        _method: GET|POST
-
-ekyna_cart_payment_check:
-    pattern: /cart/payment-check
-    defaults:
-        _controller: EkynaCartBundle:Cart:paymentCheck
-    requirements:
-        _method: GET|POST
 
 ekyna_cart_confirmation:
-    pattern: /cart/confirmation
+    pattern: /cart/confirmation/{key}
     defaults:
         _controller: EkynaCartBundle:Cart:confirmation
+    requirements:
+        _method: GET
+        key: "[\w]{32}"
+    options:
         _cms:
             parent: ekyna_cart_index
             name: Confirmation
-    requirements:
-        _method: GET|POST
 
 ekyna_cart_reset:
     pattern: /cart/reset
@@ -66,12 +65,12 @@ ekyna_cart_reset:
     requirements:
         _method: GET
 
-ekyna_cart_add_item:
-    pattern: /cart/add-item
-    defaults:
-        _controller: EkynaCartBundle:Cart:addItem
-    requirements:
-        _method: GET|POST
+#ekyna_cart_add_item:
+#    pattern: /cart/add-item
+#    defaults:
+#        _controller: EkynaCartBundle:Cart:addItem
+#    requirements:
+#        _method: GET|POST
 
 ekyna_cart_remove_item:
     pattern: /cart/remove-item/{itemId}

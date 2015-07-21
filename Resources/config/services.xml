@@ -11,8 +11,11 @@
 
         <parameter key="ekyna_cart.cart.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartType</parameter>
         <parameter key="ekyna_cart.cart_item.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartItemType</parameter>
-        <parameter key="ekyna_cart.cart_addresses.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartAddressesType</parameter>
-        <parameter key="ekyna_cart.cart_address_choice.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartAddressChoiceType</parameter>
+
+        <parameter key="ekyna_cart.step_information.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartStepInformationType</parameter>
+
+        <!--<parameter key="ekyna_cart.cart_address_choice.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartAddressChoiceType</parameter>-->
+        <parameter key="ekyna_cart.cart_payment.form_type.class">Ekyna\Bundle\CartBundle\Form\Type\CartPaymentType</parameter>
 
         <parameter key="ekyna_cart.twig.cart_extension.class">Ekyna\Bundle\CartBundle\Twig\CartExtension</parameter>
         <parameter key="ekyna_cart.twig.cart_widget.template">EkynaCartBundle:Cart:_widget.html.twig</parameter>
@@ -39,24 +42,22 @@
         </service>
         <service id="ekyna_cart.cart_item.form_type" class="%ekyna_cart.cart_item.form_type.class%">
             <argument>%ekyna_order.order_item.class%</argument>
+            <argument id="ekyna_order.item_helper" type="service" />
             <tag name="form.type" alias="ekyna_cart_item" />
         </service>
-        <service id="ekyna_cart.cart_addresses.form_type" class="%ekyna_cart.cart_addresses.form_type.class%">
+
+        <service id="ekyna_cart.step_information.form_type" class="%ekyna_cart.step_information.form_type.class%">
             <argument>%ekyna_order.order.class%</argument>
-            <tag name="form.type" alias="ekyna_cart_addresses" />
+            <tag name="form.type" alias="ekyna_cart_step_information" />
         </service>
-        <service id="ekyna_cart.cart_address_choice.form_type" class="%ekyna_cart.cart_address_choice.form_type.class%">
-            <argument>%ekyna_user.address.class%</argument>
-            <tag name="form.type" alias="ekyna_cart_address_choice" />
+        <service id="ekyna_cart.cart_payment.form_type" class="%ekyna_cart.cart_payment.form_type.class%">
+            <tag name="form.type" alias="ekyna_cart_payment" />
         </service>
 
         <!-- Twig Extensions -->
         <service id="ekyna_cart.twig.cart_extension" class="%ekyna_cart.twig.cart_extension.class%">
             <argument type="service" id="ekyna_cart.cart.provider" />
-            <argument type="collection">
-                <argument key="widget_template">%ekyna_cart.twig.cart_widget.template%</argument>
-                <argument key="summary_template">%ekyna_cart.twig.cart_summary.template%</argument>
-            </argument>
+            <argument>%ekyna_cart.config%</argument>
             <tag name="twig.extension" alias="ekyna_cart" />
         </service>
     </services>

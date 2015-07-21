@@ -18,24 +18,16 @@ class CartType extends ResourceFormType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('items', 'ekyna_core_collection', array(
-                'type' => 'ekyna_cart_item',
-                'label' => false,
-                'allow_add'    => true,
-                'allow_delete' => true,
-                'allow_sort'   => false, // TODO ?
-                'add_button_text' => 'ekyna_core.button.add',
-                'sub_widget_col'  => 11,
-                'button_col'      => 1,
-                'attr' => array(
-                    'widget_col' => 12
-                ),
+            ->add('items', 'ekyna_order_order_items', array(
+                'type'         => 'ekyna_cart_item',
+                'allow_delete' => false,
+                'allow_sort'   => false,
             ))
             ->add('save', 'submit', array(
-                'label' => 'Appliquer'
+                'label' => 'Appliquer' // TODO translation
             ))
             ->add('saveAndContinue', 'submit', array(
-                'label' => 'Valider mon panier'
+                'label' => 'Valider mon panier' // TODO translation
             ))
         ;
     }

@@ -1,15 +1,5 @@
 {% extends "EkynaCoreBundle:Form:form_div_layout.html.twig" %}
 
-{% block ekyna_cart_address_choice_widget %}
-    <div {{ block('widget_container_attributes') }}>
-    {% for child in form %}
-        {#{ form_label(child) }#}
-        {{ form_widget(child) }}
-        {{ form_errors(child) }}
-    {% endfor %}
-    </div>
-{% endblock %}
-
 {% block radio_widget %}
 {% spaceless %}
 <div class="panel panel-default">

@@ -1,10 +1,13 @@
-{% extends '::base.html.twig' %}
+{% extends 'EkynaCartBundle::layout.html.twig' %}
 
-{% block body %}
-<div class="row">
-    <div class="col-md-12">
-        {{ cms_title() }}
-        {{ cms_content() }}
-    </div>
-</div>
-{% endblock body %}
+{% block cart %}
+
+    <p>Order num : {{ order.number }}</p>
+    <p>Status : {{ ('ekyna_order.order.state.' ~ order.state)|trans }}</p>
+
+    {#
+        TODO
+        * payment status message
+    #}
+
+{% endblock cart %}

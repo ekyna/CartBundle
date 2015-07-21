@@ -21,7 +21,7 @@ class CartExtension extends \Twig_Extension
     /**
      * @var array
      */
-    protected $options;
+    protected $config;
 
     /**
      * @var \Twig_Environment
@@ -33,17 +33,12 @@ class CartExtension extends \Twig_Extension
      * Constructor.
      *
      * @param CartProviderInterface $cartProvider
-     * @param array $options
+     * @param array $config
      */
-    public function __construct(CartProviderInterface $cartProvider, array $options)
+    public function __construct(CartProviderInterface $cartProvider, array $config)
     {
         $this->cartProvider = $cartProvider;
-
-        $this->options = array_merge(array(
-        	'widget_template'           => 'EkynaCartBundle:Cart:_widget.html.twig',
-        	'summary_template'          => 'EkynaCartBundle:Cart:_summary.html.twig',
-            'add_to_cart_form_template' => 'EkynaCartBundle:Cart:_add_to_cart_form.html.twig',
-        ), $options);
+        $this->config = $config;
     }
 
     /**
@@ -52,6 +47,16 @@ class CartExtension extends \Twig_Extension
     public function initRuntime(\Twig_Environment $environment)
     {
         $this->twig = $environment;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getGlobals()
+    {
+        return array(
+            'ekyna_cart_config' => $this->config,
+        );
     }
 
     /**
@@ -64,7 +69,6 @@ class CartExtension extends \Twig_Extension
         return array(
             new \Twig_SimpleFunction('cart_widget', array($this, 'renderCartWidget'), array('is_safe' => array('html'))),
             new \Twig_SimpleFunction('cart_summary', array($this, 'renderCartSummary'), array('is_safe' => array('html'))),
-            new \Twig_SimpleFunction('add_to_cart_form', array($this, 'renderAddToCartForm'), array('is_safe' => array('html'))),
         );
     }
 
@@ -77,7 +81,7 @@ class CartExtension extends \Twig_Extension
      */
     public function renderCartWidget(array $options = array())
     {
-        $template = array_key_exists('template', $options) ? $options['template'] : $this->options['widget_template'];
+        $template = array_key_exists('template', $options) ? $options['template'] : $this->config['templates']['widget'];
         $cart = array_key_exists('cart', $options) ? $options['cart'] : $this->cartProvider->getCart();
 
         return $this->twig->render($template, array('cart' => $cart));
@@ -92,30 +96,10 @@ class CartExtension extends \Twig_Extension
      */
     public function renderCartSummary(array $options = array())
     {
-        $template = array_key_exists('template', $options) ? $options['template'] : $this->options['summary_template'];
+        $template = array_key_exists('template', $options) ? $options['template'] : $this->config['templates']['summary'];
         $cart = array_key_exists('cart', $options) ? $options['cart'] : $this->cartProvider->getCart();
 
         return $this->twig->render($template, array('cart' => $cart));
-    }
-
-    /**
-     * Renders the "Add to cart" form.
-     * 
-     * @param \Symfony\Component\Form\FormView               $form
-     * @param \Ekyna\Component\Sale\Product\ProductInterface $product
-     * @param array                                          $options
-     *
-     * @return string
-     */
-    public function renderAddToCartForm(FormView $form, ProductInterface $product, array $options = array())
-    {
-        $template = array_key_exists('template', $options) ? $options['template'] : $this->options['add_to_cart_form_template'];
-
-        return $this->twig->render($template, array(
-            'form'     => $form,
-            'product' => $product,
-            'options'  => $product->getOptionsGroups()
-        ));
     }
 
     /**

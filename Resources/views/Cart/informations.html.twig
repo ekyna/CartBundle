@@ -1,47 +1,16 @@
-{% extends '::base.html.twig' %}
+{% extends 'EkynaCartBundle::layout.html.twig' %}
 
-{% block body %}
-<div class="row">
-    <div class="col-md-12">
-        {{ cms_title() }}
-        {{ cms_content() }}
-    </div>
-</div>
-<hr>
-{% form_theme form 'EkynaCartBundle:Form:form_div_layout.html.twig' %}
-{{ bootstrap_set_style('horizontal') }}
-{{ form_errors(form) }}
-<form action="{{ path('ekyna_cart_informations') }}" method="post" class="form-horizontal">
-    {% set enable_shipment = cart.requiresShipment %}
-    {% set column_size = enable_shipment ? 4 : 6 %}
-	<div class="row">
-	    <div class="col-md-{{ column_size }}">
-	        {% include "EkynaUserBundle:Profile:show_content.html.twig" %}
-	        <p style="text-align:center;">
-			    <a href="{{ path('fos_user_profile_edit', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-sm btn-default">{{ 'ekyna_user.account.profile.edit'|trans }}</a>
-			</p>
-	    </div>
-	    <div class="col-md-{{ column_size }}">
-	        {{ form_label(form.invoiceAddress, '', {'label_col': 12}) }}
-	        {{ form_errors(form.invoiceAddress) }}
-	        <hr>
-	        {{ form_widget(form.invoiceAddress, {'widget_col': 12}) }}
-	    </div>
-	    {% if enable_shipment %}
-	    <div class="col-md-{{ column_size }}">
-	        {{ form_label(form.deliveryAddress, '', {'label_col': 12}) }}
-	        {{ form_errors(form.deliveryAddress) }}
-	        <hr>
-	        {{ form_widget(form.deliveryAddress, {'widget_col': 12}) }}
-	    </div>
-	    {% endif %}
-	</div>
-	<div class="row">
-		<div class="col-md-12" style="text-align:right">
-			{{ form_rest(form) }}
-	        <a href="{{ path('ekyna_user_address_new', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-default">{{ 'ekyna_user.account.address.new'|trans }}</a>
-			<button type="submit" class="btn btn-primary" style="margin-left:20px;">Valider</button>
-		</div>
-	</div>
+{% block cart %}
+<form action="{{ path('ekyna_cart_informations') }}" method="post">{# class="form-horizontal" #}
+    {% if user is not sameas(null) %}
+        {% include "EkynaCartBundle:Cart/Information:registered.html.twig" %}
+    {% else %}
+        {% include "EkynaCartBundle:Cart/Information:unregistered.html.twig" %}
+    {% endif %}
 </form>
-{% endblock body %}
+{% endblock cart %}
+
+{% block javascripts -%}
+    {{ parent() }}
+    <script type="text/javascript">require(['bundles/ekynacart/js/information']);</script>
+{%- endblock javascripts %}

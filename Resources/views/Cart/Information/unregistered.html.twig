@@ -1,0 +1,53 @@
+{% form_theme form 'EkynaCartBundle:Form:form_div_layout.html.twig' %}
+{#{{ bootstrap_set_style('horizontal') }}#}
+{{ bootstrap_set_col_size('md') }}
+{{ form_errors(form) }}
+{% set enable_shipment = cart.requiresShipment %}
+<div class="row">
+    <div class="col-md-6">
+        {{ form_row(form.identity) }}
+        {{ form_row(form.email) }}
+    </div>
+    <div class="col-md-6">
+        <p style="text-align:center;">
+            Créez ou connectez-vous à votre compte pour utiliser un carnet d'adresses et obtenir le suivi de votre commande.
+        </p>
+        <p style="text-align:center;">
+            <a href="{{ path('fos_user_registration_register', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-sm btn-primary">
+                {{ 'ekyna_user.account.registration.button'|trans }}
+            </a>&nbsp;&nbsp;
+            <a href="{{ path('fos_user_security_login', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-sm btn-primary">
+                {{ 'ekyna_core.button.login'|trans }}
+            </a>
+        </p>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-6">
+        <p class="h4">{{ 'ekyna_order.order.field.invoice_address'|trans }}</p>
+        <hr>
+        {{ form_errors(form.invoiceAddress) }}
+        {{ form_widget(form.invoiceAddress, {'widget_col': 12}) }}
+    </div>
+    {% if enable_shipment %}
+    <div class="col-md-6">
+        <div class="pull-right">
+            {{ form_row(form.sameAddress, {'widget_col': 12}) }}
+        </div>
+        <p class="h4">{{ 'ekyna_order.order.field.delivery_address'|trans }}</p>
+        <div id="delivery-address">
+            <hr>
+            {{ form_errors(form.deliveryAddress) }}
+            {{ form_widget(form.deliveryAddress, {'widget_col': 12}) }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12" style="text-align:center">
+        {{ form_rest(form) }}
+        <button type="submit" class="btn btn-lg btn-primary">Valider</button>
+    </div>
+</div>

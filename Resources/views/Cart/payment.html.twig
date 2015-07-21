@@ -1,16 +1,27 @@
-{% extends '::base.html.twig' %}
+{% extends 'EkynaCartBundle::layout.html.twig' %}
 
-{% block body %}
-<div class="row">
-    <div class="col-md-12">
-        {{ cms_title() }}
-        {{ cms_content() }}
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        {#<a href="{{ path('ekyna_payment_paypal') }}">Test paypal 1</a><br>#}
-        <a href="{{ path('ekyna_cart_payment') }}?method=paypal_express_checkout">Test paypal</a>
-    </div>
-</div>
-{% endblock body %}
+{% block cart %}
+    <form action="{{ path('ekyna_cart_payment') }}" method="post" class="form-horizontal" {{ form_enctype(form) }}>
+
+        {{ bootstrap_set_style('horizontal') }}
+        {{ bootstrap_set_col_size('md') }}
+        {{ form_widget(form) }}
+
+        <hr>
+        <p style="text-align: center;">
+            <button type="submit" class="btn btn-lg btn-primary">
+                {{ 'ekyna_core.button.validate'|trans }}
+            </button>
+        </p>
+
+    </form>
+{% endblock cart %}
+
+{% block stylesheets -%}
+    {{ parent() }}
+    {% stylesheets output='css/payment.css' filter='cssrewrite, ?yui_css'
+        '@EkynaPaymentBundle/Resources/asset/css/payment.css'
+    %}
+    <link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
+    {% endstylesheets %}
+{%- endblock stylesheets %}

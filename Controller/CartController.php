@@ -6,11 +6,13 @@ use Ekyna\Bundle\CoreBundle\Controller\Controller;
 use Ekyna\Bundle\OrderBundle\Entity\OrderPayment;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvent;
 use Ekyna\Bundle\OrderBundle\Event\OrderEvents;
-use Ekyna\Bundle\PaymentBundle\Payum\Request\PaymentStatusRequest;
-use Ekyna\Component\Sale\Payment\PaymentStates;
+use Ekyna\Bundle\OrderBundle\Event\OrderItemEvents;
+use Ekyna\Bundle\PaymentBundle\Event\PaymentEvent;
+use Ekyna\Bundle\PaymentBundle\Event\PaymentEvents;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Ekyna\Bundle\OrderBundle\Event\OrderItemEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -24,7 +26,6 @@ class CartController extends Controller
      * Index action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
     public function indexAction(Request $request)
@@ -58,22 +59,29 @@ class CartController extends Controller
      * Informations action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
     public function informationsAction(Request $request)
     {
-        if (null !== $redirect = $this->securityCheck($request)) {
+        if (null !== $redirect = $this->validateStep('information')) {
             return $redirect;
         }
 
         $cart = $this->getCart();
-        $user = $this->getUser();
-        $cart->setUser($user);
 
-        $form = $this->createForm('ekyna_cart_addresses', $cart, array(
-            'user' => $user
-        ));
+        /** @var \Ekyna\Bundle\UserBundle\Model\UserInterface $user */
+        $user = $this->getUser();
+        if (null !== $user) {
+            $cart
+                ->setUser($user)
+                ->setGender($user->getGender())
+                ->setFirstName($user->getFirstName())
+                ->setLastName($user->getLastName())
+                ->setEmail($user->getEmail())
+            ;
+        }
+
+        $form = $this->createForm('ekyna_cart_step_information', $cart);
 
         $form->handleRequest($request);
         if ($form->isValid()) {
@@ -81,7 +89,7 @@ class CartController extends Controller
             $this->getDispatcher()->dispatch(OrderEvents::CONTENT_CHANGE, $event);
             if (!$event->isPropagationStopped()) {
                 if ($cart->requiresShipment()) {
-                    return $this->redirect($this->generateUrl('ekyna_cart_shipping'));
+                    return $this->redirect($this->generateUrl('ekyna_cart_shipment'));
                 }
                 return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             } else {
@@ -93,20 +101,19 @@ class CartController extends Controller
         return $this->render('EkynaCartBundle:Cart:informations.html.twig', array(
             'form' => $form->createView(),
             'cart' => $cart,
-            'user' => $user,
+         	'user' => $user,
         ));
     }
 
     /**
-     * Shipping action.
+     * Shipment action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function shippingAction(Request $request)
+    public function shipmentAction(Request $request)
     {
-        if (null !== $redirect = $this->securityCheck($request)) {
+        if (null !== $redirect = $this->validateStep('shipment')) {
             return $redirect;
         }
 
@@ -130,10 +137,10 @@ class CartController extends Controller
                 $this->displayResourceEventMessages($event);
 
             }
-            return $this->redirect($this->generateUrl('ekyna_cart_shipping'));
+            return $this->redirect($this->generateUrl('ekyna_cart_shipment'));
         }*/
 
-        return $this->render('EkynaCartBundle:Cart:shipping.html.twig', array(
+        return $this->render('EkynaCartBundle:Cart:shipment.html.twig', array(
 //           'form' => $form->createView(),
 //           'cart' => $cart,
 //         	 'user' => $user,
@@ -144,116 +151,65 @@ class CartController extends Controller
      * Payment action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
     public function paymentAction(Request $request)
     {
-        if (null !== $redirect = $this->securityCheck($request)) {
+        if (null !== $redirect = $this->validateStep('payment')) {
             return $redirect;
         }
 
         $cart = $this->getCart();
-        // TODO Payment choice form
-        // $form = $this->createForm('ekyna_cart_payment', $cart);
 
-        if (null !== $method = $request->query->get('method', null)) {
-            $payment = new OrderPayment();
-            $payment
-                ->setAmount($cart->getAtiTotal())
-                ->setCurrency('EUR')
-                ->setMethod($method);
-            $cart->addPayment($payment);
+        $payment = new OrderPayment();
+        $cart->addPayment($payment);
 
-            $event = new OrderEvent($cart);
-            $this->getDispatcher()->dispatch(OrderEvents::PAYMENT_INITIALIZE, $event);
-            if (!$event->isPropagationStopped()) {
-                $captureToken = $this->get('payum.security.token_factory')->createCaptureToken(
-                    $method,
-                    $payment,
-                    'ekyna_cart_payment_check' // the route to redirect after capture;
-                );
-                return $this->redirect($captureToken->getTargetUrl());
-            } else {
-                $event->toFlashes($this->getFlashBag());
+        $form = $this->createForm('ekyna_cart_payment', $payment);
+
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            $event = new PaymentEvent($payment);
+            $this->getDispatcher()->dispatch(PaymentEvents::PREPARE, $event);
+            if (null !== $response = $event->getResponse()) {
+                return $response;
             }
-            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
         }
 
-        return $this->render('EkynaCartBundle:Cart:payment.html.twig');
-    }
-
-    /**
-     * Payment check action.
-     *
-     * @param Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function paymentCheckAction(Request $request)
-    {
-        if (null !== $redirect = $this->securityCheck($request)) {
-            return $redirect;
-        }
-
-        $httpRequestVerifier = $this->get('payum.security.http_request_verifier');
-        $token = $httpRequestVerifier->verify($request);
-
-        $status = new PaymentStatusRequest($token);
-        $this->get('payum')->getPayment($token->getPaymentName())->execute($status);
-
-        $payment = $status->getModel();
-        $cart = $payment->getOrder();
-
-        $httpRequestVerifier->invalidate($token);
-
-        $success = false;
-        if (in_array($payment->getState(), array(PaymentStates::STATE_SUCCESS, PaymentStates::STATE_COMPLETED))) {
-            $this->addFlash('ekyna_payment.success.message', 'success');
-            $success = true;
-        } else if ($payment->getState() == PaymentStates::STATE_PENDING) {
-            $this->addFlash('ekyna_payment.pending.message', 'warning');
-            $success = true;
-        } else {
-            $this->addFlash('ekyna_payment.failed.message', 'danger');
-        }
-
-        $event = new OrderEvent($cart);
-        $this->getDispatcher()->dispatch(OrderEvents::PAYMENT_COMPLETE, $event);
-        if ($event->isPropagationStopped()) {
-            $event->toFlashes($this->getFlashBag());
-        }
-
-        if (!$success) {
-            return $this->redirect($this->generateUrl('ekyna_cart_payment'));
-        }
-
-        return $this->redirect($this->generateUrl('ekyna_cart_confirmation'));
+        return $this->render('EkynaCartBundle:Cart:payment.html.twig', array(
+            'cart' => $cart,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
      * Confirmation action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
     public function confirmationAction(Request $request)
     {
-        if (null !== $redirect = $this->securityCheck($request)) {
-            return $redirect;
+        $order = $this->get('ekyna_order.order.repository')->findOneByKey(
+            $request->attributes->get('key')
+        );
+
+        if (null === $order) {
+            throw new NotFoundHttpException('Order not found.');
         }
 
-        return $this->render(
-            'EkynaCartBundle:Cart:confirmation.html.twig'
-        );
+        if (null !== $user = $order->getUser()) {
+            if ($user !== $this->getUser()) {
+                throw new AccessDeniedHttpException('You are not allowed to view this resource.');
+            }
+        }
+
+        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', array('order' => $order));
     }
 
     /**
      * Reset action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function resetAction(Request $request)
@@ -262,46 +218,9 @@ class CartController extends Controller
         $event = new OrderEvent($cart);
         $this->get('ekyna_order.order.operator')->delete($event, true);
         if (!$event->hasErrors()) {
-            $this->addFlash('ekyna_cart.event.reset');
+            $this->addFlash('ekyna_cart.message.reset');
         } else {
             $event->toFlashes($this->getFlashBag());
-        }
-
-        return $this->redirectAfterContentChange($request);
-    }
-
-    /**
-     * Add item action.
-     *
-     * @param Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-     */
-    public function addItemAction(Request $request)
-    {
-        $cart = $this->getCart();
-        $item = $this->get('ekyna_order.order_item.factory')->createItemFromRequest($request);
-
-        if (null === $item) {
-            throw new NotFoundHttpException($this->getTranslator()->trans('ekyna_cart.event.item_not_found'));
-        }
-
-        $event = new OrderItemEvent($cart, $item);
-        $this->getDispatcher()->dispatch(OrderEvents::ITEM_ADD, $event);
-        if (!$event->isPropagationStopped()) {
-            $this->addFlash($this->getTranslator()->trans('ekyna_cart.event.item_add', array(
-                '{{ name }}' => $item->getProduct()->getDesignation(),
-                '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
-            )));
-        } else {
-            $event->toFlashes($this->getFlashBag());
-        }
-
-        if ($request->isXmlHttpRequest()) {
-            // TODO
-            return new Response();
         }
 
         return $this->redirectAfterContentChange($request);
@@ -311,9 +230,7 @@ class CartController extends Controller
      * Remove item action.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
-     *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     public function removeItemAction(Request $request)
@@ -321,22 +238,28 @@ class CartController extends Controller
         $cart = $this->getCart();
         $item = $this->getDoctrine()
             ->getRepository('EkynaOrderBundle:OrderItem')
-            ->find($request->attributes->get('itemId'));
+            ->findOneBy(array(
+                'id' => $request->attributes->get('itemId'),
+                'orderId' => $cart->getId(),
+            ));
 
         if (null === $item) {
-            throw new NotFoundHttpException($this->getTranslator()->trans('ekyna_cart.event.item_not_found'));
+            throw new NotFoundHttpException($this->getTranslator()->trans('ekyna_cart.message.item_not_found'));
         }
 
         $event = new OrderItemEvent($cart, $item);
-        $this->getDispatcher()->dispatch(OrderEvents::ITEM_REMOVE, $event);
+        $this->getDispatcher()->dispatch(OrderItemEvents::REMOVE, $event);
         if (!$event->isPropagationStopped()) {
-            $this->addFlash($this->getTranslator()->trans('ekyna_cart.event.item_remove', array(
-                '{{ name }}' => $item->getProduct()->getDesignation(),
-                '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
-            )));
+            $message = 'ekyna_cart.message.item_remove.success';
+            $type    = 'success';
         } else {
-            $event->toFlashes($this->getFlashBag());
+            $message = 'ekyna_cart.message.item_remove.failure';
+            $type    = 'danger';
         }
+        $this->addFlash($this->getTranslator()->trans('ekyna_cart.message.item_remove.failure', array(
+            '{{ name }}' => $item->getDesignation(),
+            '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
+        )), $type);
 
         if ($request->isXmlHttpRequest()) {
             // TODO
@@ -344,6 +267,32 @@ class CartController extends Controller
         }
 
         return $this->redirectAfterContentChange($request);
+    }
+
+    /**
+     * Validates the cart for the given step name.
+     *
+     * @param string $step
+     * @return null|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    protected function validateStep($step)
+    {
+        $stepGroups = array(
+            'information' => array('ekyna_cart_index',        array('Default', 'Cart')),
+            'shipment'    => array('ekyna_cart_informations', array('Default', 'Cart', 'Information')),
+            'payment'     => array('ekyna_cart_shipment',     array('Default', 'Cart', 'Information', 'Shipment')),
+        );
+        if (!array_key_exists($step, $stepGroups)) {
+            throw new \InvalidArgumentException(sprintf('Undefined step "%s".', $step));
+        }
+
+        $cart = $this->getCart();
+        $errorList = $this->get('validator')->validate($cart, $stepGroups[$step][1]);
+        if (0 != $errorList->count()) {
+            return $this->redirect($this->generateUrl($stepGroups[$step][0]));
+        }
+
+        return null;
     }
 
     /**
@@ -365,7 +314,6 @@ class CartController extends Controller
      * Redirects after order content changed.
      *
      * @param Request $request
-     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     protected function redirectAfterContentChange(Request $request)

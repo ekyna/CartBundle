@@ -40,10 +40,10 @@ class CartProvider implements CartProviderInterface
 
     /**
      * Constructor.
-     * 
+     *
      * @param SessionInterface $session
-     * @param OrderRepository  $repository
-     * @param string           $key
+     * @param OrderRepository $repository
+     * @param string $key
      */
     public function __construct(SessionInterface $session, OrderRepository $repository, $key = self::KEY)
     {
@@ -87,13 +87,14 @@ class CartProvider implements CartProviderInterface
      */
     public function getCart()
     {
-        if(null === $this->cart) {
-            if(null !== $cartId = $this->session->get($this->key, null)) {
+        if (null === $this->cart) {
+            if (null !== $cartId = $this->session->get($this->key, null)) {
+                /** @var \Ekyna\Component\Sale\Order\OrderInterface $cart */
                 if (null !== $cart = $this->repository->findOneBy(array('id' => $cartId, 'type' => OrderTypes::TYPE_CART))) {
                     $this->setCart($cart);
                 }
             }
-            if(null === $this->cart) {
+            if (null === $this->cart) {
                 $this->newCart();
             }
         }

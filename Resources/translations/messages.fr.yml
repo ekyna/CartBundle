@@ -1,6 +1,18 @@
 ekyna_cart:
-    event:
+    message:
         item_not_found: Article introuvable.
-        item_add: L'article <strong>"{{ name }}"</strong> a bien été ajouté à <a href="{{ path }}">votre panier</a>.
-        item_remove: L'article <strong>"{{ name }}"</strong> a bien été retiré de <a href="{{ path }}">votre panier</a>.
+        item_add:
+            success: >
+                L'article <strong>"{{ name }}"</strong> a bien été ajouté à
+                <a href="{{ path }}">votre panier</a>.
+            failure: >
+                Une erreur s'est produite lors de l'ajout de l'article
+                <strong>"{{ name }}"</strong> à <a href="{{ path }}">votre panier</a>.
+        item_remove:
+            success: >
+                L'article <strong>"{{ name }}"</strong> a bien été
+                retiré de <a href="{{ path }}">votre panier</a>.
+            failure: >
+                Une erreur s'est produite lors de la suppression de l'article
+                <strong>"{{ name }}"</strong> de <a href="{{ path }}">votre panier</a>.
         reset: Votre panier a bien été vidé.

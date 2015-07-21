@@ -1,97 +1,82 @@
-{% extends '::base.html.twig' %}
+{% extends 'EkynaCartBundle::layout.html.twig' %}
 
-{% block body %}
-<div class="row">
-    <div class="col-md-12">
-        {{ cms_title() }}
-        {{ cms_content() }}
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col-md-12">
-		{% if not cart.empty %}
-		{{ form_errors(form) }}
-		
-		<form action="{{ path('ekyna_cart_index') }}" method="post" novalidate>
+{# TODO translations #}
+
+{% block cart %}
+{% if not cart.empty %}
+    <form action="{{ path('ekyna_cart_index') }}" method="post" novalidate>
         {{ bootstrap_set_style('horizontal') }}
-		    <div class="table-responsive">
-				<table class="table table-striped">
-				    <thead>
-				        <tr>
-				            <th>Désignation</th>
-				            <th width="12%">Prix&nbsp;unit.&nbsp;HT</th>
-				            <th width="8%">Quantité</th>
-				            <th width="12%">Total HT</th>
-				            <th></th>
-				        </tr>
-				    </thead>
-				    <tbody>
-				        {% for item in cart.items %}
-				        <tr>
-				            <td>
-				            {% block item_designation %}
-				                <a href="#">{{ item.designation }}</a>
-				                {% if item.options|length > 0 %}
-				                <ul>
-				                {% for option in item.options %}
-				                    <li>{{ option.designation }} (+ {{ option.netPrice|price }})</li>
-				                {% endfor %}
-				                </ul>
-				                {% endif %}
-				            {% endblock %}
-				            </td>
-				            <td>{{ item.baseNetPrice|price(5) }}</td>
-				            <td>
-				                {{ form_widget(form.items[loop.index0].quantity, {'label': false}) }}
-				                {{ form_errors(form.items[loop.index0].quantity) }}
-				            </td>
-				            <td>{{ item.totalNetPrice|price }}</td>
-				            <td>
-				                <a href="{{ path('ekyna_cart_remove_item', {'itemId': item.id}) }}" class="btn btn-sm btn-danger">&times;</a>
-				            </td>
-				        </tr>
-				        {% endfor %}
-				        <tr>
-				            <td></td>
-				            <td></td>
-				            <td>
-				                {{ form_widget(form.save) }}
-				            </td>
-				            <td></td>
-				            <td></td>
-				        </tr>
-				    </tbody>
-				    <tfoot>
-				        {% set taxes = cart.taxesAmounts %}
-				        <tr>
-				            <td rowspan="{{ 3 + taxes|length }}" style="text-align:center;">
-				                <a href="{{ path('ekyna_cart_reset') }}" class="btn btn-link">Vider mon panier</a>
-	                            {{ form_widget(form.saveAndContinue) }}
-			                    {{ form_rest(form) }}
-				            </td>
-				            <th colspan="2">Sous-Total HT</th>
-				            <td>{{ cart.netTotal|price }}</td>
-				            <td rowspan="{{ 3 + taxes|length }}"></td>
-				        </tr>
-				        {% for tax in taxes %}
-				        <tr>
-				            <th colspan="2">{{ tax.name }}</th>
-				            <td>{{ tax.amount|price }}</td>
-				        </tr>
-				        {% endfor %}
-				        <tr>
-				            <th colspan="2">Total TTC</th>
-				            <td>{{ cart.atiTotal|price }}</td>
-				        </tr>
-				    </tfoot>
-				</table>
-		    </div>
-		</form>
-		
-		{% else %}
-		<p>Votre panier est vide.</p>
-		{% endif %}
-    </div>
-</div>
-{% endblock body %}
+        {{ form_errors(form) }}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Désignation</th>
+                        <th width="12%">Prix&nbsp;unit.&nbsp;HT</th>
+                        <th width="8%">Quantité</th>
+                        <th width="12%">Total HT</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart.items %}
+                    <tr>
+                        <td>
+                        {% block item_designation %}
+                            <a href="#">{{ item.designation }}</a>
+                        {% endblock %}
+                        </td>
+                        <td>{{ item.price|price(5) }}</td>
+                        <td>
+                            {{ form_widget(form.items[loop.index0].quantity, {'label': false}) }}
+                            {{ form_errors(form.items[loop.index0].quantity) }}
+                        </td>
+                        <td>{{ item|total|price }}</td>
+                        <td>
+                            {% if not form.items[loop.index0].quantity.vars.disabled %}
+                                <a href="{{ path('ekyna_cart_remove_item', {'itemId': item.id}) }}" class="btn btn-sm btn-danger">&times;</a>
+                            {% endif %}
+                            {{ form_rest(form.items[loop.index0]) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            {{ form_widget(form.save) }}
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    {% set taxes = cart|taxes %}
+                    <tr>
+                        <td rowspan="{{ 3 + taxes|length }}" style="text-align:center;">
+                            <a href="{{ path('ekyna_cart_reset') }}" class="btn btn-link">Vider mon panier</a>
+                            {{ form_widget(form.saveAndContinue) }}
+                            {{ form_rest(form) }}
+                        </td>
+                        <th colspan="2">Sous-Total HT</th>
+                        <td>{{ cart|total|price }}</td>
+                        <td rowspan="{{ 3 + taxes|length }}"></td>
+                    </tr>
+                    {% for tax in taxes %}
+                    <tr>
+                        <th colspan="2">{{ tax.name }}</th>
+                        <td>{{ tax.amount|price }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <th colspan="2">Total TTC</th>
+                        <td>{{ cart|total(true)|price }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </form>
+{% else %}
+    <p>Votre panier est vide.</p>
+{% endif %}
+{% endblock cart %}

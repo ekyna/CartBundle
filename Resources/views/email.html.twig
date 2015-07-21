@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:19px;color:#333333;background:#f2f2f2;">
+<div style="width:600px;margin:auto;">
+    <div style="box-shadow:0 2px 4px #cccccc;">
+        <div style="background:#1aa1e1;padding:15px;">
+            <h1 style="color:#ffffff;padding:0;margin:0;font-size:24px;line-height:24px;font-weight:normal;text-align:center;">
+                {% block subject %}{% endblock %}
+            </h1>
+        </div>
+        <div style="background:#ffffff;padding:15px;">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
