@@ -22,8 +22,10 @@
                     {% for item in cart.items %}
                     <tr>
                         <td>
+                            {# TODO item_designation twig filter #}
+                            {# TODO item_frontend_path twig filter #}
                         {% block item_designation %}
-                            <a href="#">{{ item.designation }}</a>
+                            <a href="#">{{ item.designation|nl2br|raw }}</a>
                         {% endblock %}
                         </td>
                         <td>{{ item.price|price(5) }}</td>

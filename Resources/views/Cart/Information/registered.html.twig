@@ -6,12 +6,12 @@
 {% set column_size = enable_shipment ? 4 : 6 %}
 <div class="row">
     <div class="col-md-{{ column_size }}">
-    {% include "EkynaUserBundle:Profile:show_content.html.twig" %}
-    <p style="text-align:center;">
-        <a href="{{ path('fos_user_profile_edit', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-sm btn-default">
-            {{ 'ekyna_user.account.profile.edit'|trans }}
-        </a>
-    </p>
+        {% include "EkynaUserBundle:Profile:show_content.html.twig" %}
+        <p style="text-align:center;">
+            <a href="{{ path('fos_user_profile_edit', {'_redirect': path('ekyna_cart_informations')}) }}" class="btn btn-sm btn-default">
+                {{ 'ekyna_user.account.profile.edit'|trans }}
+            </a>
+        </p>
     </div>
     <div class="col-md-{{ column_size }}">
         <p class="h4">{{ 'ekyna_order.order.field.invoice_address'|trans }}</p>

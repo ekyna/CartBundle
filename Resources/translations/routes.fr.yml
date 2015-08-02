@@ -1,0 +1,7 @@
+ekyna_cart_index: /mon-panier
+ekyna_cart_informations: /mon-panier/informations
+ekyna_cart_shipment: /mon-panier/livraison
+ekyna_cart_payment: /mon-panier/paiement
+ekyna_cart_confirmation: /mon-panier/confirmation/{key}
+ekyna_cart_reset: /mon-panier/reinitialiser
+ekyna_cart_remove_item: /mon-panier/retirer-element/{itemId}

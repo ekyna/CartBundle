@@ -1,5 +1,5 @@
 ekyna_cart_index:
-    pattern: /cart/index
+    pattern: /cart
     defaults:
         _controller: EkynaCartBundle:Cart:index
     requirements:
@@ -52,7 +52,7 @@ ekyna_cart_confirmation:
         _controller: EkynaCartBundle:Cart:confirmation
     requirements:
         _method: GET
-        key: "[\w]{32}"
+        key: "[\w-_]{32}"
     options:
         _cms:
             parent: ekyna_cart_index
@@ -64,13 +64,6 @@ ekyna_cart_reset:
         _controller: EkynaCartBundle:Cart:reset
     requirements:
         _method: GET
-
-#ekyna_cart_add_item:
-#    pattern: /cart/add-item
-#    defaults:
-#        _controller: EkynaCartBundle:Cart:addItem
-#    requirements:
-#        _method: GET|POST
 
 ekyna_cart_remove_item:
     pattern: /cart/remove-item/{itemId}

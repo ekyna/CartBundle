@@ -1,0 +1,7 @@
+ekyna_cart_index: /my-cart
+ekyna_cart_informations: /my-cart/informations
+ekyna_cart_shipment: /my-cart/shipment
+ekyna_cart_payment: /my-cart/payment
+ekyna_cart_confirmation: /my-cart/confirmation/{key}
+ekyna_cart_reset: /my-cart/reset
+ekyna_cart_remove_item: /my-cart/remove-element/{itemId}
