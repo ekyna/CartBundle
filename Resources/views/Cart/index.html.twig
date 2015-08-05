@@ -1,7 +1,5 @@
 {% extends 'EkynaCartBundle::layout.html.twig' %}
 
-{# TODO translations #}
-
 {% block cart %}
 {% if not cart.empty %}
     <form action="{{ path('ekyna_cart_index') }}" method="post" novalidate>
@@ -11,10 +9,10 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Désignation</th>
-                        <th width="12%">Prix&nbsp;unit.&nbsp;HT</th>
-                        <th width="8%">Quantité</th>
-                        <th width="12%">Total HT</th>
+                        <th>{{ 'ekyna_order.view.designation'|trans }}</th>
+                        <th width="12%">{{ 'ekyna_order.view.unit_net_price'|trans }}</th>
+                        <th width="8%">{{ 'ekyna_order.view.quantity'|trans }}</th>
+                        <th width="12%">{{ 'ekyna_order.view.total_net_price'|trans }}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -56,11 +54,11 @@
                     {% set taxes = cart|taxes %}
                     <tr>
                         <td rowspan="{{ 3 + taxes|length }}" style="text-align:center;">
-                            <a href="{{ path('ekyna_cart_reset') }}" class="btn btn-link">Vider mon panier</a>
+                            <a href="{{ path('ekyna_cart_reset') }}" class="btn btn-link">{{ 'ekyna_cart.button.clear'|trans }}</a>
                             {{ form_widget(form.saveAndContinue) }}
                             {{ form_rest(form) }}
                         </td>
-                        <th colspan="2">Sous-Total HT</th>
+                        <th colspan="2">{{ 'ekyna_order.view.net_sub_total'|trans }}</th>
                         <td>{{ cart|total|price }}</td>
                         <td rowspan="{{ 3 + taxes|length }}"></td>
                     </tr>
@@ -71,7 +69,7 @@
                     </tr>
                     {% endfor %}
                     <tr>
-                        <th colspan="2">Total TTC</th>
+                        <th colspan="2">{{ 'ekyna_order.view.ati_total'|trans }}</th>
                         <td>{{ cart|total(true)|price }}</td>
                     </tr>
                 </tfoot>
@@ -79,6 +77,6 @@
         </div>
     </form>
 {% else %}
-    <p>Votre panier est vide.</p>
+    <p>{{ 'ekyna_cart.empty'|trans }}</p>
 {% endif %}
 {% endblock cart %}

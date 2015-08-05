@@ -16,3 +16,8 @@ ekyna_cart:
                 Une erreur s'est produite lors de la suppression de l'article
                 <strong>"{{ name }}"</strong> de <a href="{{ path }}">votre panier</a>.
         reset: Votre panier a bien été vidé.
+    button:
+        save: Appliquer
+        save_and_continue: Valider mon panier
+        clear: Vider mon panier
+    empty: Votre panier est vide

@@ -24,10 +24,10 @@ class CartType extends ResourceFormType
                 'allow_sort'   => false,
             ))
             ->add('save', 'submit', array(
-                'label' => 'Appliquer' // TODO translation
+                'label' => 'ekyna_cart.button.save',
             ))
             ->add('saveAndContinue', 'submit', array(
-                'label' => 'Valider mon panier' // TODO translation
+                'label' => 'ekyna_cart.button.save_and_continue',
             ))
         ;
     }
