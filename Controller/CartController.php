@@ -162,6 +162,7 @@ class CartController extends Controller
         $cart = $this->getCart();
 
         $payment = new OrderPayment();
+        $payment->setAmount($this->get('ekyna_order.order.calculator')->calculateOrderRemainingTotal($cart));
         $cart->addPayment($payment);
 
         $form = $this->createForm('ekyna_cart_payment', $payment);
