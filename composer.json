@@ -21,11 +21,10 @@
         "ekyna/order-bundle" : "0.3.*@dev"
     },
     "autoload" : {
-        "psr-0" : {
-            "Ekyna\\Bundle\\CartBundle" : ""
+        "psr-4" : {
+            "Ekyna\\Bundle\\CartBundle\\" : ""
         }
     },
-    "target-dir" : "Ekyna/Bundle/CartBundle",
     "extra" : {
         "branch-alias" : {
             "dev-master" : "0.3.x-dev"
