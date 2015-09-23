@@ -2,7 +2,7 @@
 
 {% block cart %}
 <form action="{{ path('ekyna_cart_informations') }}" method="post">{# class="form-horizontal" #}
-    {% if user is not sameas(null) %}
+    {% if user is not same as(null) %}
         {% include "EkynaCartBundle:Cart/Information:registered.html.twig" %}
     {% else %}
         {% include "EkynaCartBundle:Cart/Information:unregistered.html.twig" %}

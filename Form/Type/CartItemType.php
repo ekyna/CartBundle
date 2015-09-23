@@ -27,8 +27,8 @@ class CartItemType extends OrderItemType
      */
     protected function getFields(array $options)
     {
-        return array(
-            array('quantity', 'integer', array('attr' => array('min' => 1))),
-        );
+        return [
+            ['quantity', 'integer', ['attr' => ['min' => 1]]],
+        ];
     }
 }

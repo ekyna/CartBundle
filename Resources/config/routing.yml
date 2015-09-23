@@ -1,9 +1,8 @@
 ekyna_cart_index:
-    pattern: /cart
+    path: /cart
     defaults:
         _controller: EkynaCartBundle:Cart:index
-    requirements:
-        _method: GET|POST
+    methods: [GET|POST]
     options:
         _cms:
             name: Mon panier
@@ -14,44 +13,41 @@ ekyna_cart_index:
                 index: false
 
 ekyna_cart_informations:
-    pattern: /cart/informations
+    path: /cart/informations
     defaults:
         _controller: EkynaCartBundle:Cart:informations
-    requirements:
-        _method: GET|POST
+    methods: [GET|POST]
     options:
         _cms:
             parent: ekyna_cart_index
             name: Mes informations
 
 ekyna_cart_shipment:
-    pattern: /cart/shipment
+    path: /cart/shipment
     defaults:
         _controller: EkynaCartBundle:Cart:shipment
-    requirements:
-        _method: GET|POST
+    methods: [GET|POST]
     options:
         _cms:
             parent: ekyna_cart_index
             name: Mode de livraisons
 
 ekyna_cart_payment:
-    pattern: /cart/payment
+    path: /cart/payment
     defaults:
         _controller: EkynaCartBundle:Cart:payment
-    requirements:
-        _method: GET|POST
+    methods: [GET|POST]
     options:
         _cms:
             parent: ekyna_cart_index
             name: Moyen de paiement
 
 ekyna_cart_confirmation:
-    pattern: /cart/confirmation/{key}
+    path: /cart/confirmation/{key}
     defaults:
         _controller: EkynaCartBundle:Cart:confirmation
+    methods: [GET]
     requirements:
-        _method: GET
         key: "[\w-_]{32}"
     options:
         _cms:
@@ -59,16 +55,15 @@ ekyna_cart_confirmation:
             name: Confirmation
 
 ekyna_cart_reset:
-    pattern: /cart/reset
+    path: /cart/reset
     defaults:
         _controller: EkynaCartBundle:Cart:reset
-    requirements:
-        _method: GET
+    methods: [GET]
 
 ekyna_cart_remove_item:
-    pattern: /cart/remove-item/{itemId}
+    path: /cart/remove-item/{itemId}
     defaults:
         _controller: EkynaCartBundle:Cart:removeItem
+    methods: [GET|POST]
     requirements:
-        _method: GET|POST
         itemId: \d+

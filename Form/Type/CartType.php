@@ -18,17 +18,17 @@ class CartType extends ResourceFormType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('items', 'ekyna_order_order_items', array(
+            ->add('items', 'ekyna_order_order_items', [
                 'type'         => 'ekyna_cart_item',
                 'allow_delete' => false,
                 'allow_sort'   => false,
-            ))
-            ->add('save', 'submit', array(
+            ])
+            ->add('save', 'submit', [
                 'label' => 'ekyna_cart.button.save',
-            ))
-            ->add('saveAndContinue', 'submit', array(
+            ])
+            ->add('saveAndContinue', 'submit', [
                 'label' => 'ekyna_cart.button.save_and_continue',
-            ))
+            ])
         ;
     }
 

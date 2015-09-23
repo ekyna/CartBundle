@@ -75,10 +75,10 @@ class CartListener implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-    	return array(
-    		OrderEvents::CONTENT_CHANGE => array('onPostContentChange', -1024),
-    		OrderEvents::STATE_CHANGE   => array('onPostStateChange',   -1024),
-    		OrderEvents::POST_DELETE    => array('onPostDelete',    -1024),
-    	);
+    	return [
+    		OrderEvents::CONTENT_CHANGE => ['onPostContentChange', -1024],
+    		OrderEvents::STATE_CHANGE   => ['onPostStateChange',   -1024],
+    		OrderEvents::POST_DELETE    => ['onPostDelete',    -1024],
+    	];
     }
 }

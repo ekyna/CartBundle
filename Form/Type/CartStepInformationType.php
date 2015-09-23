@@ -3,7 +3,7 @@
 namespace Ekyna\Bundle\CartBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormEvent;
@@ -49,41 +49,41 @@ class CartStepInformationType extends AbstractType
             if (null === $user) {
                 $form
                     ->add('identity', 'ekyna_user_identity')
-                    ->add('email', 'email', array(
+                    ->add('email', 'email', [
                         'label' => 'ekyna_core.field.email',
-                    ))
-                    ->add('invoiceAddress', 'ekyna_user_address', array(
+                    ])
+                    ->add('invoiceAddress', 'ekyna_user_address', [
                         'label' => 'ekyna_order.order.field.invoice_address',
-                    ))
+                    ])
                 ;
                 if ($cart->requiresShipment()) {
                     $form
-                        ->add('sameAddress', 'checkbox', array(
+                        ->add('sameAddress', 'checkbox', [
                             'label' => 'ekyna_order.order.field.same_address',
                             'required' => false,
-                        ))
-                        ->add('deliveryAddress', 'ekyna_user_address', array(
+                        ])
+                        ->add('deliveryAddress', 'ekyna_user_address', [
                             'label' => 'ekyna_order.order.field.delivery_address',
                             'required' => false,
-                        ))
+                        ])
                     ;
                 }
             } else {
-                $form->add('invoiceAddress', 'ekyna_user_address_choice', array(
+                $form->add('invoiceAddress', 'ekyna_user_address_choice', [
                     'label' => 'ekyna_order.order.field.invoice_address',
                     'user'  => $user,
-                ));
+                ]);
                 if ($cart->requiresShipment()) {
                     $form
-                        ->add('sameAddress', 'checkbox', array(
+                        ->add('sameAddress', 'checkbox', [
                             'label' => 'ekyna_order.order.field.same_address',
                             'required' => false,
-                        ))
-                        ->add('deliveryAddress', 'ekyna_user_address_choice', array(
+                        ])
+                        ->add('deliveryAddress', 'ekyna_user_address_choice', [
                             'label' => 'ekyna_order.order.field.delivery_address',
                             'required' => false,
                             'user'  => $user,
-                        ))
+                        ])
                     ;
                 }
             }
@@ -93,17 +93,15 @@ class CartStepInformationType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver
-            ->setDefaults(array(
+            ->setDefaults([
                 'data_class'        => $this->dataClass,
-                'validation_groups' => array('Default', 'Information')
-            ))
-            ->setRequired(array('data_class'))
-            ->setAllowedTypes(array(
-            	'data_class' => 'string',
-            ))
+                'validation_groups' => ['Default', 'Information']
+            ])
+            ->setRequired(['data_class'])
+            ->setAllowedTypes('data_class', 'string')
         ;
     }
 

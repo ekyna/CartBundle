@@ -40,9 +40,9 @@ class EkynaCartExtension extends Extension
 
         $bundles = $container->getParameter('kernel.bundles');
         if (array_key_exists('AsseticBundle', $bundles)) {
-            $container->prependExtensionConfig('assetic', array(
-                'bundles' => array('EkynaCartBundle')
-            ));
+            $container->prependExtensionConfig('assetic', [
+                'bundles' => ['EkynaCartBundle']
+            ]);
         }
     }
 }

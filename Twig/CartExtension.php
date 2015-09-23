@@ -52,9 +52,9 @@ class CartExtension extends \Twig_Extension
      */
     public function getGlobals()
     {
-        return array(
+        return [
             'ekyna_cart_config' => $this->config,
-        );
+        ];
     }
 
     /**
@@ -64,10 +64,10 @@ class CartExtension extends \Twig_Extension
      */
     public function getFunctions()
     {
-        return array(
-            new \Twig_SimpleFunction('cart_widget', array($this, 'renderCartWidget'), array('is_safe' => array('html'))),
-            new \Twig_SimpleFunction('cart_summary', array($this, 'renderCartSummary'), array('is_safe' => array('html'))),
-        );
+        return [
+            new \Twig_SimpleFunction('cart_widget', [$this, 'renderCartWidget'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFunction('cart_summary', [$this, 'renderCartSummary'], ['is_safe' => ['html']]),
+        ];
     }
 
     /**
@@ -77,12 +77,12 @@ class CartExtension extends \Twig_Extension
      *
      * @return string
      */
-    public function renderCartWidget(array $options = array())
+    public function renderCartWidget(array $options = [])
     {
         $template = array_key_exists('template', $options) ? $options['template'] : $this->config['templates']['widget'];
         $cart = array_key_exists('cart', $options) ? $options['cart'] : $this->cartProvider->getCart();
 
-        return $this->twig->render($template, array('cart' => $cart));
+        return $this->twig->render($template, ['cart' => $cart]);
     }
 
     /**
@@ -92,12 +92,12 @@ class CartExtension extends \Twig_Extension
      *
      * @return string
      */
-    public function renderCartSummary(array $options = array())
+    public function renderCartSummary(array $options = [])
     {
         $template = array_key_exists('template', $options) ? $options['template'] : $this->config['templates']['summary'];
         $cart = array_key_exists('cart', $options) ? $options['cart'] : $this->cartProvider->getCart();
 
-        return $this->twig->render($template, array('cart' => $cart));
+        return $this->twig->render($template, ['cart' => $cart]);
     }
 
     /**

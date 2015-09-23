@@ -90,7 +90,7 @@ class CartProvider implements CartProviderInterface
         if (null === $this->cart) {
             if (null !== $cartId = $this->session->get($this->key, null)) {
                 /** @var \Ekyna\Component\Sale\Order\OrderInterface $cart */
-                if (null !== $cart = $this->repository->findOneBy(array('id' => $cartId, 'type' => OrderTypes::TYPE_CART))) {
+                if (null !== $cart = $this->repository->findOneBy(['id' => $cartId, 'type' => OrderTypes::TYPE_CART])) {
                     $this->setCart($cart);
                 }
             }

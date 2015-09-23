@@ -49,10 +49,10 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('ekyna_cart_index'));
         }
 
-        return $this->render('EkynaCartBundle:Cart:index.html.twig', array(
+        return $this->render('EkynaCartBundle:Cart:index.html.twig', [
             'cart' => $cart,
             'form' => $form->createView()
-        ));
+        ]);
     }
 
     /**
@@ -98,11 +98,11 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('ekyna_cart_informations'));
         }
 
-        return $this->render('EkynaCartBundle:Cart:informations.html.twig', array(
+        return $this->render('EkynaCartBundle:Cart:informations.html.twig', [
             'form' => $form->createView(),
             'cart' => $cart,
          	'user' => $user,
-        ));
+        ]);
     }
 
     /**
@@ -140,11 +140,11 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('ekyna_cart_shipment'));
         }*/
 
-        return $this->render('EkynaCartBundle:Cart:shipment.html.twig', array(
+        return $this->render('EkynaCartBundle:Cart:shipment.html.twig', [
 //           'form' => $form->createView(),
 //           'cart' => $cart,
 //         	 'user' => $user,
-        ));
+        ]);
     }
 
     /**
@@ -176,10 +176,10 @@ class CartController extends Controller
             }
         }
 
-        return $this->render('EkynaCartBundle:Cart:payment.html.twig', array(
+        return $this->render('EkynaCartBundle:Cart:payment.html.twig', [
             'cart' => $cart,
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
@@ -204,7 +204,7 @@ class CartController extends Controller
             }
         }
 
-        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', array('order' => $order));
+        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', ['order' => $order]);
     }
 
     /**
@@ -239,10 +239,10 @@ class CartController extends Controller
         $cart = $this->getCart();
         $item = $this->getDoctrine()
             ->getRepository('EkynaOrderBundle:OrderItem')
-            ->findOneBy(array(
+            ->findOneBy([
                 'id' => $request->attributes->get('itemId'),
                 'orderId' => $cart->getId(),
-            ));
+            ]);
 
         if (null === $item) {
             throw new NotFoundHttpException($this->getTranslator()->trans('ekyna_cart.message.item_not_found'));
@@ -257,10 +257,10 @@ class CartController extends Controller
             $message = 'ekyna_cart.message.item_remove.failure';
             $type    = 'danger';
         }
-        $this->addFlash($this->getTranslator()->trans($message, array(
+        $this->addFlash($this->getTranslator()->trans($message, [
             '{{ name }}' => $item->getDesignation(),
             '{{ path }}' => $this->generateUrl('ekyna_cart_index'),
-        )), $type);
+        ]), $type);
 
         if ($request->isXmlHttpRequest()) {
             // TODO
@@ -278,11 +278,11 @@ class CartController extends Controller
      */
     protected function validateStep($step)
     {
-        $stepGroups = array(
-            'information' => array('ekyna_cart_index',        array('Default', 'Cart')),
-            'shipment'    => array('ekyna_cart_informations', array('Default', 'Cart', 'Information')),
-            'payment'     => array('ekyna_cart_shipment',     array('Default', 'Cart', 'Information', 'Shipment')),
-        );
+        $stepGroups = [
+            'information' => ['ekyna_cart_index',        ['Default', 'Cart']],
+            'shipment'    => ['ekyna_cart_informations', ['Default', 'Cart', 'Information']],
+            'payment'     => ['ekyna_cart_shipment',     ['Default', 'Cart', 'Information', 'Shipment']],
+        ];
         if (!array_key_exists($step, $stepGroups)) {
             throw new \InvalidArgumentException(sprintf('Undefined step "%s".', $step));
         }
@@ -304,7 +304,7 @@ class CartController extends Controller
      */
     protected function securityCheck(Request $request)
     {
-        if (!$this->get('security.context')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $request->getSession()->set('_ekyna.login_success.target_path', 'ekyna_cart_informations');
             return $this->redirect($this->generateUrl('fos_user_security_login'));
         }
