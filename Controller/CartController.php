@@ -198,8 +198,9 @@ class CartController extends Controller
      */
     public function confirmationAction(Request $request)
     {
+        /** @var \Ekyna\Component\Sale\Order\OrderInterface $order */
         $order = $this->get('ekyna_order.order.repository')->findOneByKey(
-            $request->attributes->get('key')
+            $request->attributes->get('orderKey')
         );
 
         if (null === $order) {
@@ -212,7 +213,22 @@ class CartController extends Controller
             }
         }
 
-        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', array('order' => $order));
+        if (null === $payment = $order->findPaymentById($request->attributes->get('paymentId'))) {
+            throw new NotFoundHttpException('Payment not found.');
+        }
+
+        /** @var \Ekyna\Bundle\PaymentBundle\Model\MethodInterface $method */
+        $method = $payment->getMethod();
+        $message = $method->getMessageByState($payment->getState());
+        if (null === $message->getFlash()) {
+            $message = null;
+        }
+
+        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', array(
+            'order'   => $order,
+            'payment' => $payment,
+            'message' => $message,
+        ));
     }
 
     /**

@@ -29,7 +29,6 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('email')->defaultValue('EkynaCartBundle::email.html.twig')->end()
                         ->scalarNode('widget')->defaultValue('EkynaCartBundle:Cart:_widget.html.twig')->end()
                         ->scalarNode('summary')->defaultValue('EkynaCartBundle:Cart:_summary.html.twig')->end()
-//                        ->scalarNode('add_to_cart')->defaultValue('EkynaCartBundle:Cart:_add_to_cart.html.twig')->end()
                     ->end()
                 ->end()
             ->end()

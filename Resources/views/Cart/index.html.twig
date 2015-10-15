@@ -2,6 +2,7 @@
 
 {% block cart %}
 {% if not cart.empty %}
+    {% set currency = cart.currency %}
     <form action="{{ path('ekyna_cart_index') }}" method="post" novalidate>
         {{ bootstrap_set_style('horizontal') }}
         {{ form_errors(form) }}
@@ -26,12 +27,12 @@
                             <a href="#">{{ item.designation|nl2br|raw }}</a>
                         {% endblock %}
                         </td>
-                        <td>{{ item.price|price(5) }}</td>
+                        <td>{{ item.price|localizedcurrency(currency) }}</td>
                         <td>
                             {{ form_widget(form.items[loop.index0].quantity, {'label': false}) }}
                             {{ form_errors(form.items[loop.index0].quantity) }}
                         </td>
-                        <td>{{ item|total|price }}</td>
+                        <td>{{ item|order_item_total|localizedcurrency(currency) }}</td>
                         <td>
                             {% if not form.items[loop.index0].quantity.vars.disabled %}
                                 <a href="{{ path('ekyna_cart_remove_item', {'itemId': item.id}) }}" class="btn btn-sm btn-danger">&times;</a>
@@ -41,17 +42,15 @@
                     </tr>
                     {% endfor %}
                     <tr>
-                        <td></td>
-                        <td></td>
+                        <td colspan="2"></td>
                         <td>
                             {{ form_widget(form.save) }}
                         </td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="2"></td>
                     </tr>
                 </tbody>
                 <tfoot>
-                    {% set taxes = cart|taxes %}
+                    {% set taxes = cart|order_taxes %}
                     <tr>
                         <td rowspan="{{ 3 + taxes|length }}" style="text-align:center;">
                             <a href="{{ path('ekyna_cart_reset') }}" class="btn btn-link">{{ 'ekyna_cart.button.clear'|trans }}</a>
@@ -59,18 +58,18 @@
                             {{ form_rest(form) }}
                         </td>
                         <th colspan="2">{{ 'ekyna_order.view.net_sub_total'|trans }}</th>
-                        <td>{{ cart|total|price }}</td>
+                        <td>{{ cart|order_total|localizedcurrency(currency) }}</td>
                         <td rowspan="{{ 3 + taxes|length }}"></td>
                     </tr>
                     {% for tax in taxes %}
                     <tr>
                         <th colspan="2">{{ tax.name }}</th>
-                        <td>{{ tax.amount|price }}</td>
+                        <td>{{ tax.amount|localizedcurrency(currency) }}</td>
                     </tr>
                     {% endfor %}
                     <tr>
                         <th colspan="2">{{ 'ekyna_order.view.ati_total'|trans }}</th>
-                        <td>{{ cart|total(true)|price }}</td>
+                        <td>{{ cart|order_total(true)|localizedcurrency(currency) }}</td>
                     </tr>
                 </tfoot>
             </table>
