@@ -2,16 +2,19 @@
 
 {% block cart %}
 
-    {% if message is defined %}
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="alert alert-info">
-                {{ message.flash|raw }}
+    {% block confirmation_message -%}
+        {% if message is not same as(null) -%}
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="alert alert-info">
+                    {{ message.flash|raw }}
+                </div>
             </div>
         </div>
-    </div>
-    {% endif %}
+        {%- endif %}
+    {%- endblock confirmation_message %}
 
+    {% block confirmation_status -%}
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <table class="table">
@@ -38,7 +41,9 @@
             </table>
         </div>
     </div>
+    {%- endblock confirmation_status %}
 
+    {% block confirmation_details -%}
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <table class="table">
@@ -63,5 +68,6 @@
             </table>
         </div>
     </div>
+    {%- endblock confirmation_details %}
 
 {% endblock cart %}

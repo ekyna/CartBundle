@@ -220,7 +220,7 @@ class CartController extends Controller
         /** @var \Ekyna\Bundle\PaymentBundle\Model\MethodInterface $method */
         $method = $payment->getMethod();
         $message = $method->getMessageByState($payment->getState());
-        if (null === $message->getFlash()) {
+        if (null === $message || 0 == strlen($message->getFlash())) {
             $message = null;
         }
 
