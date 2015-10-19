@@ -24,11 +24,11 @@ interface CartProviderInterface
     public function clearCart();
 
     /**
-     * Creates a new cart.
+     * Returns whether the use has a cart or not.
      *
-     * @return OrderInterface
+     * @return bool
      */
-    public function newCart();
+    public function hasCart();
 
     /**
      * Returns the stored cart.
