@@ -124,7 +124,7 @@ class CartController extends Controller
             return $this->redirect($this->generateUrl('ekyna_cart_payment'));
         }
 
-        /*
+        /* TODO
         $form = $this->createForm('ekyna_cart_shipment', $cart);
 
         $form->handleRequest($request);
@@ -134,8 +134,7 @@ class CartController extends Controller
             if (!$event->isPropagationStopped()) {
                 return $this->redirect($this->generateUrl('ekyna_cart_payment'));
             } else {
-                $this->displayResourceEventMessages($event);
-
+                $event->toFlashes($this->getFlashBag());
             }
             return $this->redirect($this->generateUrl('ekyna_cart_shipment'));
         }*/
@@ -161,8 +160,15 @@ class CartController extends Controller
 
         $cart = $this->getCart();
 
-        $payment = new OrderPayment();
-        $payment->setAmount($this->get('ekyna_order.order.calculator')->calculateOrderRemainingTotal($cart));
+        $amount = $this
+            ->get('ekyna_order.order.calculator')
+            ->calculateOrderRemainingTotal($cart)
+        ;
+
+        $paymentClass = $this->container->getParameter('ekyna_order.order_payment.class');
+        /** @var \Ekyna\Component\Sale\Order\OrderPaymentInterface $payment */
+        $payment = new $paymentClass;
+        $payment->setAmount($amount);
         $cart->addPayment($payment);
 
         $form = $this->createForm('ekyna_cart_payment', $payment);
@@ -171,7 +177,9 @@ class CartController extends Controller
         if ($form->isValid()) {
             $event = new PaymentEvent($payment);
             $this->getDispatcher()->dispatch(PaymentEvents::PREPARE, $event);
-            if (null !== $response = $event->getResponse()) {
+            if ($event->isPropagationStopped()) {
+                $event->toFlashes($this->getFlashBag());
+            } elseif (null !== $response = $event->getResponse()) {
                 return $response;
             }
         }
@@ -190,8 +198,9 @@ class CartController extends Controller
      */
     public function confirmationAction(Request $request)
     {
+        /** @var \Ekyna\Component\Sale\Order\OrderInterface $order */
         $order = $this->get('ekyna_order.order.repository')->findOneByKey(
-            $request->attributes->get('key')
+            $request->attributes->get('orderKey')
         );
 
         if (null === $order) {
@@ -204,7 +213,22 @@ class CartController extends Controller
             }
         }
 
-        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', ['order' => $order]);
+        if (null === $payment = $order->findPaymentById($request->attributes->get('paymentId'))) {
+            throw new NotFoundHttpException('Payment not found.');
+        }
+
+        /** @var \Ekyna\Bundle\PaymentBundle\Model\MethodInterface $method */
+        $method = $payment->getMethod();
+        $message = $method->getMessageByState($payment->getState());
+        if (null === $message || 0 == strlen($message->getFlash())) {
+            $message = null;
+        }
+
+        return $this->render('EkynaCartBundle:Cart:confirmation.html.twig', [
+            'order'   => $order,
+            'payment' => $payment,
+            'message' => $message,
+        ]);
     }
 
     /**
