@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <td>Montant de votre paiement</td>
-                    <td>{{ payment.amount|localizedcurrency(payment.currency) }}</td>
+                    <td>{{ payment.getAmount()|localizedcurrency(payment.currency) }}</td>
                 </tr>
                 <tr>
                     <td>Statut de votre paiement</td>
