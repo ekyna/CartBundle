@@ -74,12 +74,27 @@ class CartProvider implements CartProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function newCart()
+    public function hasCart()
     {
-        $this->clearCart();
-        $this->setCart($this->repository->createNew(OrderTypes::TYPE_CART));
+        if (null !== $this->cart) {
+            return true;
+        }
 
-        return $this->cart;
+        if (null !== $cartId = $this->session->get($this->key, null)) {
+            /** @var \Ekyna\Component\Sale\Order\OrderInterface $cart */
+            $cart = $this->repository->findOneBy([
+                'id'   => $cartId,
+                'type' => OrderTypes::TYPE_CART
+            ]);
+            if (null !== $cart) {
+                $this->setCart($cart);
+                return true;
+            } else {
+                $this->clearCart();
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -87,17 +102,24 @@ class CartProvider implements CartProviderInterface
      */
     public function getCart()
     {
-        if (null === $this->cart) {
-            if (null !== $cartId = $this->session->get($this->key, null)) {
-                /** @var \Ekyna\Component\Sale\Order\OrderInterface $cart */
-                if (null !== $cart = $this->repository->findOneBy(['id' => $cartId, 'type' => OrderTypes::TYPE_CART])) {
-                    $this->setCart($cart);
-                }
-            }
+        if (!$this->hasCart()) {
             if (null === $this->cart) {
                 $this->newCart();
             }
         }
+
+        return $this->cart;
+    }
+
+    /**
+     * Creates a new cart.
+     *
+     * @return \Ekyna\Component\Sale\Order\OrderInterface
+     */
+    private function newCart()
+    {
+        $this->clearCart();
+        $this->setCart($this->repository->createNew(OrderTypes::TYPE_CART));
 
         return $this->cart;
     }
