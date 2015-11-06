@@ -2,12 +2,72 @@
 
 {% block cart %}
 
-    <p>Order num : {{ order.number }}</p>
-    <p>Status : {{ ('ekyna_order.order.state.' ~ order.state)|trans }}</p>
+    {% block confirmation_message -%}
+        {% if message is not same as(null) -%}
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="alert alert-info">
+                    {{ message.flash|raw }}
+                </div>
+            </div>
+        </div>
+        {%- endif %}
+    {%- endblock confirmation_message %}
 
-    {#
-        TODO
-        * payment status message
-    #}
+    {% block confirmation_status -%}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <table class="table">
+                <tr>
+                    <td>Numéro de commande</td>
+                    <td>{{ order.number }}</td>
+                </tr>
+                <tr>
+                    <td>Statut de votre commande</td>
+                    <td>{{ order|order_state_badge }}</td>
+                </tr>
+                <tr>
+                    <td>Mode de paiement</td>
+                    <td>{{ payment.method.gatewayName }}</td>
+                </tr>
+                <tr>
+                    <td>Montant de votre paiement</td>
+                    <td>{{ payment.getAmount()|localizedcurrency(payment.currency) }}</td>
+                </tr>
+                <tr>
+                    <td>Statut de votre paiement</td>
+                    <td>{{ payment|payment_state_badge }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {%- endblock confirmation_status %}
+
+    {% block confirmation_details -%}
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Désignation</th>
+                        <th>Quantité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in order.items %}
+                    <tr>
+                        <td>
+                            {{ item.designation|nl2br|raw }}
+                        </td>
+                        <td>
+                            {{ item.quantity }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {%- endblock confirmation_details %}
 
 {% endblock cart %}

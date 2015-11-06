@@ -18,16 +18,11 @@
     ],
     "require" : {
         "php" : ">=5.4",
-        "ekyna/order-bundle" : "1.0.x-dev"
+        "ekyna/order-bundle" : "dev-master"
     },
     "autoload" : {
         "psr-4" : {
             "Ekyna\\Bundle\\CartBundle\\" : ""
-        }
-    },
-    "extra" : {
-        "branch-alias" : {
-            "dev-master" : "1.0.x-dev"
         }
     }
 }

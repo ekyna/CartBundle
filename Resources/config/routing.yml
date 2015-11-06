@@ -43,12 +43,13 @@ ekyna_cart_payment:
             name: Moyen de paiement
 
 ekyna_cart_confirmation:
-    path: /cart/confirmation/{key}
+    path: /cart/confirmation/{orderKey}-{paymentId}
     defaults:
         _controller: EkynaCartBundle:Cart:confirmation
     methods: [GET]
     requirements:
-        key: "[\w-_]{32}"
+        orderKey: "[a-zA-Z\d]{32}"
+        paymentId: \d+
     options:
         _cms:
             parent: ekyna_cart_index
