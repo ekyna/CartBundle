@@ -18,7 +18,7 @@
     ],
     "require" : {
         "php" : ">=5.4",
-        "ekyna/order-bundle" : "0.5.x-dev"
+        "ekyna/order-bundle" : "0.4.x-dev"
     },
     "autoload" : {
         "psr-4" : {
